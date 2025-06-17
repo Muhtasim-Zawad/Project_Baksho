@@ -1,0 +1,10 @@
+import express from 'express'
+import jwt from 'jsonwebtoken'
+import { registerUser } from '../controllers/authControllers.js';
+
+const router = express.Router();
+
+router.post('/register', registerUser)
+
+
+export default router
