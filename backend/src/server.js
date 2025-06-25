@@ -1,7 +1,20 @@
 import express from 'express'
+import dotenv from 'dotenv'
+import mongoose from 'mongoose'
+import passport from 'passport'
+
+
+import authRoutes from './routes/authRoutes.js'
+
+
+
+dotenv.config();
 
 const app = express();
-const PORT = 8000;
+const PORT = process.env.PORT ||  8000;
+
+//routes
+app.use('/api/auth', authRoutes)
 
 
 app.get('/', (req, res) => {
