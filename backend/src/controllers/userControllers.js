@@ -19,8 +19,17 @@ export const getUserById = async (req, res) => {
 }
 
 export const updateUserProfile = async (req, res) => {
-  const loggedInUser = req.user; 
-  const newProfile = req.body;
+  const loggedInUser = req.user;
+  const {
+    name,
+    bio,
+    location,
+    website,
+    avatar,
+    preferences,
+    socialMedia
+  } = req.body;
+
 
   try {
     const existingUser = await User.findById(loggedInUser._id);
@@ -28,9 +37,20 @@ export const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    const updatedFields = {
+      ...(name && { name }),
+      ...(bio && { bio }),
+      ...(location && { location }),
+      ...(website && { website }),
+      ...(avatar && { avatar }),
+      ...(Array.isArray(preferences) && { preferences }),
+      ...(socialMedia && typeof socialMedia === 'object' && { socialMedia }),
+      updatedAt: new Date()
+    };
+
     const result = await User.updateOne(
       { _id: loggedInUser._id },
-      { $set: { ...newProfile, updatedAt: new Date() } }
+      { $set: updatedFields }
     );
 
     res.status(200).json({ message: 'Profile updated successfully', result });
@@ -39,6 +59,7 @@ export const updateUserProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 export const changePasswordByUser = async (req, res) => {
