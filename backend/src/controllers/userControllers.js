@@ -91,3 +91,13 @@ export const changePasswordByUser = async (req, res) => {
         res.status(500).json({ message: 'Server error while updating password' });
     }
 }
+
+export const deactivateProfile = async (req, res) => {
+    const loggedInUser = req.user;
+    try {
+        await User.findByIdAndDelete(loggedInUser._id);
+        res.json({message: 'Account Deleted Successfully!!'});
+    } catch (error) {
+        res.json({error: error.message});
+    }
+}
