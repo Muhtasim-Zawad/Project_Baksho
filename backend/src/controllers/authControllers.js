@@ -16,7 +16,7 @@ export const registerUser = async (req, res) => {
     delete resUser.__v;
     delete resUser.createdAt;
     delete resUser.updatedAt;
-    
+
 
     const accessToken = await generateAccessToken(newUser);
     const refreshToken = await generateRefreshToken(newUser);
@@ -37,9 +37,12 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
+    
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } })
 
     const accessToken = await generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user);
