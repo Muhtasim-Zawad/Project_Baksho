@@ -7,5 +7,4 @@ router.post('/register', registerUser);
 router.post("/login", loginUser);
 router.post('/refresh', generateNewAccessToken);
 
-
 export default router

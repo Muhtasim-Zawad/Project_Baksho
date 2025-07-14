@@ -1,12 +1,13 @@
 import express from 'express'
 import dotenv from 'dotenv'
-import mongoose from 'mongoose'
-import passport from 'passport'
+import { connectDB } from './config/db.js';
 
 
 import authRoutes from './routes/authRoutes.js'
 
 
+//db connection
+connectDB();
 
 dotenv.config();
 
