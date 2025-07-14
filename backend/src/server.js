@@ -5,6 +5,7 @@ dotenv.config();
 import { connectDB } from './config/db.js';
 
 import authRoutes from './routes/authRoutes.js'
+import userRoutes from './routes/userRoutes.js'
 
 const app = express();
 const PORT = process.env.PORT ||  8000;
@@ -23,7 +24,7 @@ connectDB();
 //auth route
 app.use('/api/users/auth', authRoutes)
 //user route
-
+app.use('/api/users/', userRoutes)
 
 app.get('/', (req, res) => {
   res.send('Baksho is Running!!!');
