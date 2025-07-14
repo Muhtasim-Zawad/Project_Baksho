@@ -1,6 +1,6 @@
 import express from 'express'
-import { verifyUser } from '../middlewares/verifyToken.js';
-import { changePasswordByUser, deactivateProfile, getUserById, updateUserProfile } from '../controllers/userControllers.js';
+import { verfiyAdmin, verifyUser } from '../middlewares/verifyToken.js';
+import { changePasswordByUser, deactivateProfile, getAllUsersByAdmin, getUserById, updateUserProfile } from '../controllers/userControllers.js';
 
 
 const router = express.Router();
@@ -16,6 +16,6 @@ router.put('/update-profile', verifyUser, updateUserProfile)
 router.put('/change-password', verifyUser, changePasswordByUser)
 router.delete('/deactivate-profile', verifyUser, deactivateProfile);
 
-
+router.get('/get-all', verfiyAdmin, getAllUsersByAdmin);
 
 export default router;
