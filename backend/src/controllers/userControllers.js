@@ -16,3 +16,19 @@ export const getUserById = async(req, res) => {
         res.json({message: `Error: ${error.message}`})
     }
 }
+
+export const updateUserProfile = async(req, res) => {
+    const {id} = req.params;
+    const newProfile = req.body;
+
+    try {
+        const user = await User.findOne({_id: id});
+        if(!user) return res.json({message: 'User not found'});
+
+        const result = await User.updateOne({_id: id}, {$set: {...newProfile, updatedAt: new Date()}})
+        res.json(result);
+    } catch (error) {
+        console.log(error.message);
+        res.send({error: error.message});
+    }
+}

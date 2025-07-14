@@ -61,6 +61,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null
     },
+    
+    isBanned: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true, // Automatically adds createdAt & updatedAt
