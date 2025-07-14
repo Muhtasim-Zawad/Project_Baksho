@@ -38,8 +38,6 @@ export const verfiyAdmin = async (req, res, next) => {
         const user = await User.findById(id);
         const isAdmin = user.role == 'admin';
 
-        console.log(user.role);
-
         if(!isAdmin) return res.status(401).json({message: "Access denied!!"});
 
         next();
