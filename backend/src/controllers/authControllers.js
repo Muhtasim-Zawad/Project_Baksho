@@ -1,42 +1,60 @@
 import jwt from 'jsonwebtoken'
 import User from "../models/User.js";
+import { generateAccessToken, generateRefreshToken } from '../utils/token.js';
 
 
 export const registerUser = async (req, res) => {
-    const { email, password } = req.body;
+  const { name, email, password, role } = req.body;
+  try {
+    const userExists = await User.findOne({ email })
+    if (userExists) return res.status(400).json({ message: "User already exists!" });
 
-    try {
-        const userExists = await User.findOne({ email })
-        if (userExists) return res.status(400).json({ message: "User already exists!" });
+    const newUser = await User.create({ name, email, password, role });
 
-        const newUser = await User.create({ email, password });
-        res.status(201).json({ message: 'Registered successfully' });
+    const resUser = newUser.toObject();
+    delete resUser.password;
+    delete resUser.__v;
+    delete resUser.createdAt;
+    delete resUser.updatedAt;
+    
 
-    } catch (err) {
-        res.status(500).json({ message: 'Server error' });
-    }
+    const accessToken = await generateAccessToken(newUser);
+    const refreshToken = await generateRefreshToken(newUser);
+
+    res.status(201).json({
+      accessToken,
+      refreshToken,
+      user: resUser,
+      message: 'Registered successfully'
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 }
 
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = await generateAccessToken(user);
+    const refreshToken = await generateRefreshToken(user);
+
+    const resUser = user.toObject();
+    delete resUser.password;
+    delete resUser.__v;
+    delete resUser.createdAt;
+    delete resUser.updatedAt;
 
     res.json({
       accessToken,
       refreshToken,
-      user: {
-        id: user._id,
-        email: user.email
-      }
+      user: resUser,
+      message: "Login Success!!"
     });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
