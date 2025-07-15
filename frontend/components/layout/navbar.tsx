@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Bell, Box, Menu, Package, Plus, Search } from "lucide-react";
 import { NotificationPanel } from "@/components/notifications/notification-panel";
+import { ModeToggle } from "../mode-toggle";
 
 export function Navbar() {
 	const { user, logout } = useAuth();
@@ -70,9 +71,10 @@ export function Navbar() {
 				</div>
 
 				<div className="flex items-center gap-4">
-					<Button variant="ghost" size="icon" className="hidden md:flex">
+					{/* <Button variant="ghost" size="icon" className="hidden md:flex">
 						<Search className="h-4 w-4" />
-					</Button>
+					</Button> */}
+					<ModeToggle />
 
 					{user ? (
 						<>

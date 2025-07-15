@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { NotificationProvider } from "@/contexts/notification-context";
 import { Navbar } from "@/components/layout/navbar";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,16 +22,18 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="en">
-			<body className={inter.className}>
-				<AuthProvider>
-					<NotificationProvider>
-						<Navbar />
-						{children}
-						<Toaster />
-					</NotificationProvider>
-				</AuthProvider>
-			</body>
-		</html>
+		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+			<html lang="en">
+				<body className={inter.className}>
+					<AuthProvider>
+						<NotificationProvider>
+							<Navbar />
+							{children}
+							<Toaster />
+						</NotificationProvider>
+					</AuthProvider>
+				</body>
+			</html>
+		</ThemeProvider>
 	);
 }
