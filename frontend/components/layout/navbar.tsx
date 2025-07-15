@@ -98,7 +98,7 @@ export function Navbar() {
 								>
 									<Bell className="h-4 w-4" />
 									{unreadCount > 0 && (
-										<Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
+										<Badge className="absolute -top-1 -right-0 h-5 w-5 rounded-full p-1 text-xs">
 											{unreadCount}
 										</Badge>
 									)}
@@ -118,7 +118,7 @@ export function Navbar() {
 									>
 										<Avatar className="h-8 w-8">
 											<AvatarImage
-												src={user.avatar || "/placeholder.svg"}
+												src={user.avatar || "/placeholder-user.jpg"}
 												alt={user.name}
 											/>
 											<AvatarFallback>

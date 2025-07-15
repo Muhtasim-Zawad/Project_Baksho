@@ -9,7 +9,7 @@ export function Footer() {
 					<div className="space-y-4">
 						<div className="flex items-center gap-2">
 							<Box className="h-6 w-6 text-primary" />
-							<span className="text-xl font-bold">CrowdFund</span>
+							<span className="text-xl font-bold">Baksho</span>
 						</div>
 						<p className="text-sm text-muted-foreground">
 							Empowering dreams and making positive change possible through
@@ -123,9 +123,7 @@ export function Footer() {
 				</div>
 
 				<div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-					<p>
-						&copy; {new Date().getFullYear()} CrowdFund. All rights reserved.
-					</p>
+					<p>&copy; {new Date().getFullYear()} Baksho. All rights reserved.</p>
 				</div>
 			</div>
 		</footer>

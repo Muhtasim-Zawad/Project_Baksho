@@ -7,6 +7,7 @@ import { NotificationProvider } from "@/contexts/notification-context";
 import { Navbar } from "@/components/layout/navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Footer } from "@/components/layout/footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
 						<NotificationProvider>
 							<Navbar />
 							{children}
+							<Footer />
 							<Toaster />
 						</NotificationProvider>
 					</AuthProvider>
