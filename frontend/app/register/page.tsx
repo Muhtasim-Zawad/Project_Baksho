@@ -18,7 +18,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Box, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,6 +33,7 @@ export default function RegisterPage() {
 	const { register, loading } = useAuth();
 	const router = useRouter();
 	const { toast } = useToast();
+
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -60,7 +60,7 @@ export default function RegisterPage() {
 				description:
 					"Welcome to CrowdFund. Let's make dreams reality together.",
 			});
-			// router.push("/user/dashboard");
+			router.push("/user/dashboard");
 		} catch (err: any) {
 			setError(err.message || "Failed to create account. Please try again.");
 		}

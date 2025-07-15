@@ -7,34 +7,6 @@ import { axiosPublic } from "@/hooks/useAxiosPublic";
 import { axiosPrivate } from "@/hooks/useAxiosPrivate";
 
 export type UserRole = "user" | "admin";
-
-/**
-	 * {
-	"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzY2ZmJhMmVjMjQwMDEyZDMwOWM2MiIsImlhdCI6MTc1MjU5MjMxNCwiZXhwIjoxNzUzMTk3MTE0fQ.K96C1sCnOnzFJ__YETIns0EQaqWWU7othpK21qeiN-Q",
-	"refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzY2ZmJhMmVjMjQwMDEyZDMwOWM2MiIsImlhdCI6MTc1MjU5MjMxNCwiZXhwIjoxNzUzMTk3MTE0fQ.K96C1sCnOnzFJ__YETIns0EQaqWWU7othpK21qeiN-Q",
-	"user": {
-		"email": "wacukugyne@mailinator.com",
-		"name": "Xanthus Burke",
-		"role": "user",
-		"avatar": "",
-		"bio": "",
-		"location": "",
-		"website": "",
-		"socialMedia": {
-			"twitter": "",
-			"facebook": "",
-			"instagram": "",
-			"linkedin": ""
-		},
-		"preferences": [],
-		"lastLogin": null,
-		"isBanned": false,
-		"_id": "68766fba2ec240012d309c62"
-	},
-	"message": "Registered successfully"
-}
-	 */
-
 export interface SocialMedia {
 	twitter: string;
 	facebook: string;
@@ -76,23 +48,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
 
-	const getUser = async () => {
-		const res = await axiosPrivate.get('/api/users/get-profile');
-		if (res.status == 200) {
-			const { user } = res?.data;
-			setUser(user);
-		}
-	}
-
 	useEffect(() => {
-		getUser();
-		setLoading(false);
+		const fetchUser = async () => {
+			const accessToken = localStorage.getItem("accessToken");
+			if (!accessToken) {
+				setLoading(false);
+				return;
+			}
+
+			try {
+				const res = await axiosPrivate.get('/api/users/get-profile');
+				if (res.status === 200) {
+					setUser(res.data);
+				}
+			} catch (error: any) {
+				console.error("Failed to fetch user profile:", error);
+				if (error.response?.status === 401) {
+					logout(); 
+				}
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchUser();
 	}, []);
+
+
 
 	const login = async (email: string, password: string) => {
 		setLoading(true);
 		try {
-			const res = await axiosPublic.post('/api/users/auth/signup', { email, password })
+			const res = await axiosPublic.post('/api/users/auth/login', { email, password })
 			if (res.status == 200) {
 				const { accessToken, refreshToken, user } = res?.data;
 
@@ -100,6 +87,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				localStorage.setItem('refreshToken', refreshToken);
 				setUser(user);
 			}
+			console.log(res);
+		} catch (error: any) {
+			const message =
+				error?.response?.data?.message || "Failed to create account.";
+			throw new Error(message);
 		} finally {
 			setLoading(false);
 		}

@@ -39,9 +39,9 @@ export default function LoginPage() {
 				title: "Welcome back!",
 				description: "You have successfully logged in.",
 			});
-			router.push("/");
-		} catch (err) {
-			setError("Invalid email or password");
+			router.push("/user/dashboard");
+		} catch (err:any) {
+			setError(err.message || "Invalid email or password");
 		}
 	};
 
