@@ -2,16 +2,59 @@
 
 import type React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
+import axios from 'axios'
+import { axiosPublic } from "@/hooks/useAxiosPublic";
+import { axiosPrivate } from "@/hooks/useAxiosPrivate";
 
-export type UserRole = "donor" | "organizer" | "admin";
+export type UserRole = "user" | "admin";
+
+/**
+	 * {
+	"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzY2ZmJhMmVjMjQwMDEyZDMwOWM2MiIsImlhdCI6MTc1MjU5MjMxNCwiZXhwIjoxNzUzMTk3MTE0fQ.K96C1sCnOnzFJ__YETIns0EQaqWWU7othpK21qeiN-Q",
+	"refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzY2ZmJhMmVjMjQwMDEyZDMwOWM2MiIsImlhdCI6MTc1MjU5MjMxNCwiZXhwIjoxNzUzMTk3MTE0fQ.K96C1sCnOnzFJ__YETIns0EQaqWWU7othpK21qeiN-Q",
+	"user": {
+		"email": "wacukugyne@mailinator.com",
+		"name": "Xanthus Burke",
+		"role": "user",
+		"avatar": "",
+		"bio": "",
+		"location": "",
+		"website": "",
+		"socialMedia": {
+			"twitter": "",
+			"facebook": "",
+			"instagram": "",
+			"linkedin": ""
+		},
+		"preferences": [],
+		"lastLogin": null,
+		"isBanned": false,
+		"_id": "68766fba2ec240012d309c62"
+	},
+	"message": "Registered successfully"
+}
+	 */
+
+export interface SocialMedia {
+	twitter: string;
+	facebook: string;
+	instagram: string;
+	linkedin: string;
+}
 
 export interface User {
-	id: string;
+	_id: string;
 	email: string;
 	name: string;
 	role: UserRole;
 	avatar?: string;
 	preferences?: string[];
+	isbanned: boolean;
+	lastLogin: Date;
+	socialMedia: SocialMedia;
+	website: string;
+	bio: string;
+	location: string;
 }
 
 interface AuthContextType {
@@ -33,28 +76,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		// Check for stored user session
-		const storedUser = localStorage.getItem("user");
-		if (storedUser) {
-			setUser(JSON.parse(storedUser));
+	const getUser = async () => {
+		const res = await axiosPrivate.get('/api/users/get-profile');
+		if (res.status == 200) {
+			const { user } = res?.data;
+			setUser(user);
 		}
+	}
+
+	useEffect(() => {
+		getUser();
 		setLoading(false);
 	}, []);
 
 	const login = async (email: string, password: string) => {
 		setLoading(true);
 		try {
-			// Mock login - replace with actual API call
-			const mockUser: User = {
-				id: "1",
-				email,
-				name: email.split("@")[0],
-				role: email.includes("admin") ? "admin" : "donor",
-				avatar: "/placeholder-user.jpg?height=40&width=40",
-			};
-			setUser(mockUser);
-			localStorage.setItem("user", JSON.stringify(mockUser));
+			const res = await axiosPublic.post('/api/users/auth/signup', { email, password })
+			if (res.status == 200) {
+				const { accessToken, refreshToken, user } = res?.data;
+
+				localStorage.setItem('accessToken', accessToken);
+				localStorage.setItem('refreshToken', refreshToken);
+				setUser(user);
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -63,29 +108,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const register = async (
 		email: string,
 		password: string,
-		name: string,
-		role: UserRole
+		name: string
 	) => {
 		setLoading(true);
 		try {
-			// Mock registration - replace with actual API call
-			const mockUser: User = {
-				id: Date.now().toString(),
+			const res = await axiosPublic.post('/api/users/auth/signup', {
 				email,
+				password,
 				name,
-				role,
-				avatar: "/placeholder-user.jpg?height=40&width=40",
-			};
-			setUser(mockUser);
-			localStorage.setItem("user", JSON.stringify(mockUser));
+			});
+
+			if (res.status === 201) {
+				const { accessToken, refreshToken, user } = res.data;
+
+				localStorage.setItem('accessToken', accessToken);
+				localStorage.setItem('refreshToken', refreshToken);
+				setUser(user);
+			}
+		} catch (error: any) {
+			const message =
+				error?.response?.data?.message || "Failed to create account.";
+			throw new Error(message);
 		} finally {
 			setLoading(false);
 		}
 	};
 
+
+
+
 	const logout = () => {
 		setUser(null);
-		localStorage.removeItem("user");
+		localStorage.removeItem("accessToken");
+		localStorage.removeItem("refreshToken");
 	};
 
 	return (

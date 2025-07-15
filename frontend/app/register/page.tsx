@@ -28,7 +28,7 @@ export default function RegisterPage() {
 		email: "",
 		password: "",
 		confirmPassword: "",
-		role: "donor" as UserRole,
+		role: "user" as UserRole,
 	});
 	const [error, setError] = useState("");
 	const { register, loading } = useAuth();
@@ -54,16 +54,15 @@ export default function RegisterPage() {
 				formData.email,
 				formData.password,
 				formData.name,
-				formData.role
 			);
 			toast({
 				title: "Account created!",
 				description:
 					"Welcome to CrowdFund. Let's make dreams reality together.",
 			});
-			router.push("/preferences");
-		} catch (err) {
-			setError("Failed to create account. Please try again.");
+			// router.push("/user/dashboard");
+		} catch (err: any) {
+			setError(err.message || "Failed to create account. Please try again.");
 		}
 	};
 
@@ -92,8 +91,10 @@ export default function RegisterPage() {
 								id="name"
 								placeholder="Enter your full name"
 								value={formData.name}
-								onChange={(e) =>
+								onChange={(e) =>{
 									setFormData({ ...formData, name: e.target.value })
+									setError('');
+								}
 								}
 								required
 							/>
@@ -105,8 +106,10 @@ export default function RegisterPage() {
 								type="email"
 								placeholder="Enter your email"
 								value={formData.email}
-								onChange={(e) =>
+								onChange={(e) =>{
 									setFormData({ ...formData, email: e.target.value })
+									setError('')
+								}
 								}
 								required
 							/>
@@ -118,8 +121,10 @@ export default function RegisterPage() {
 								type="password"
 								placeholder="Create a password"
 								value={formData.password}
-								onChange={(e) =>
+								onChange={(e) =>{
 									setFormData({ ...formData, password: e.target.value })
+									setError('');
+								}
 								}
 								required
 							/>
@@ -131,32 +136,15 @@ export default function RegisterPage() {
 								type="password"
 								placeholder="Confirm your password"
 								value={formData.confirmPassword}
-								onChange={(e) =>
+								onChange={(e) =>{
 									setFormData({ ...formData, confirmPassword: e.target.value })
+									setError('');
+								}
 								}
 								required
 							/>
 						</div>
-						<div className="space-y-3">
-							<Label>I want to:</Label>
-							<RadioGroup
-								value={formData.role}
-								onValueChange={(value) =>
-									setFormData({ ...formData, role: value as UserRole })
-								}
-							>
-								<div className="flex items-center space-x-2">
-									<RadioGroupItem value="donor" id="donor" />
-									<Label htmlFor="donor">Support campaigns (Donor)</Label>
-								</div>
-								<div className="flex items-center space-x-2">
-									<RadioGroupItem value="organizer" id="organizer" />
-									<Label htmlFor="organizer">
-										Create campaigns (Organizer)
-									</Label>
-								</div>
-							</RadioGroup>
-						</div>
+
 					</CardContent>
 					<CardFooter className="flex flex-col space-y-4">
 						<Button type="submit" className="w-full" disabled={loading}>

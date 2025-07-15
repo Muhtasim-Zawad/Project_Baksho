@@ -20,7 +20,7 @@ import { Bell, Box, Menu, Package, Plus, Search } from "lucide-react";
 import { NotificationPanel } from "@/components/notifications/notification-panel";
 import { ModeToggle } from "../mode-toggle";
 
-export function Navbar() {
+export const Navbar = () => {
 	const { user, logout } = useAuth();
 	const { notifications } = useNotifications();
 	const [showNotifications, setShowNotifications] = useState(false);
@@ -32,10 +32,8 @@ export function Navbar() {
 		switch (user.role) {
 			case "admin":
 				return "/admin/dashboard";
-			case "organizer":
-				return "/organizer/dashboard";
 			default:
-				return "/donor/dashboard";
+				return "/user/dashboard";
 		}
 	};
 
@@ -197,3 +195,5 @@ export function Navbar() {
 		</nav>
 	);
 }
+
+

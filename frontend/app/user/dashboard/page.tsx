@@ -98,7 +98,7 @@ const incentives = [
 	},
 ];
 
-export default function DonorDashboard() {
+export default function UserDashboard() {
 	const { user } = useAuth();
 
 	if (!user) {
