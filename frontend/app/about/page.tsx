@@ -22,6 +22,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
+import riyad from '../../assets/images/riyad.jpg'
+import zawad from '../../assets/images/zawad.jpg'
+import asif from '../../assets/images/asif.jpg'
+
 const stats = [
 	{
 		icon: Users,
@@ -78,28 +82,22 @@ const features = [
 
 const team = [
 	{
-		name: "Sarah Johnson",
-		role: "CEO & Co-Founder",
-		image: "/placeholder.svg?height=150&width=150",
-		bio: "Former nonprofit director with 10+ years in social impact and technology.",
+		name: "Muhtasim Zawad",
+		role: "Frontend Developer",
+		image: zawad,
+		bio: "Designing trust, one pixel at a time",
 	},
 	{
-		name: "Michael Chen",
-		role: "CTO & Co-Founder",
-		image: "/placeholder.svg?height=150&width=150",
-		bio: "Tech veteran who previously built fintech platforms at major companies.",
+		name: "Riyad Hosen",
+		role: "Fullstack Developer",
+		image: riyad,
+		bio: "Connecting ideas to impact, end to end",
 	},
 	{
-		name: "Emily Rodriguez",
-		role: "Head of Community",
-		image: "/placeholder.svg?height=150&width=150",
-		bio: "Community building expert passionate about connecting people with causes.",
-	},
-	{
-		name: "David Kim",
-		role: "Head of Product",
-		image: "/placeholder.svg?height=150&width=150",
-		bio: "Product strategist focused on creating meaningful user experiences.",
+		name: "MD. Abidur Rahman Asif",
+		role: "Backend Engineer",
+		image: '',
+		bio: "Building the engine behind every dream funded",
 	},
 ];
 
@@ -325,7 +323,7 @@ export default function AboutPage() {
 						</p>
 					</div>
 
-					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 						{team.map((member, index) => (
 							<Card key={index} className="text-center">
 								<CardContent className="pt-6">

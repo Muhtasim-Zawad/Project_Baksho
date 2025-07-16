@@ -7,8 +7,11 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 
+
 const app = express();
 const PORT = process.env.PORT ||  8000;
+
+
 //middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
