@@ -92,6 +92,21 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 		fetchCampaigns();
 	}, []);
 
+	const createCampaign = async (data: Partial<Campaign>) => {
+		setLoading(true);
+		try {
+			const res = await axiosPrivate.post("/api/campaigns", data);
+			if (res.status === 201) {
+				setCampaigns((prev) => [...prev, res.data]);
+			}
+		} catch (error) {
+			console.error("Failed to create campaign:", error);
+			throw error;
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<CampaignContext.Provider
 			value={{
