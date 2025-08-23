@@ -22,9 +22,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-import riyad from '../../assets/images/riyad.jpg'
-import zawad from '../../assets/images/zawad.jpg'
-import asif from '../../assets/images/asif.jpg'
+import riyad from "../../assets/images/riyad.jpg";
+import zawad from "../../assets/images/zawad.jpg";
+import asif from "../../assets/images/asif.jpg";
 
 const stats = [
 	{
@@ -96,7 +96,7 @@ const team = [
 	{
 		name: "MD. Abidur Rahman Asif",
 		role: "Backend Engineer",
-		image: '',
+		image: asif,
 		bio: "Building the engine behind every dream funded",
 	},
 ];

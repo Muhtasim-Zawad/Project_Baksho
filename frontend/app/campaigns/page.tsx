@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import {
 	Card,
 	CardContent,
@@ -138,8 +139,16 @@ export default function CampaignsPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("All");
 	const [sortBy, setSortBy] = useState("featured");
+	const [allCampaigns, setAllCampaigns] = useState(campaigns);
 
-	const filteredCampaigns = campaigns.filter((campaign) => {
+	useEffect(() => {
+		const localCampaigns = JSON.parse(
+			localStorage.getItem("campaigns") || "[]"
+		);
+		setAllCampaigns([...campaigns, ...localCampaigns]);
+	}, []);
+
+	const filteredCampaigns = allCampaigns.filter((campaign) => {
 		const matchesSearch =
 			campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -163,8 +172,8 @@ export default function CampaignsPage() {
 		}
 	});
 
-	const featuredCampaigns = campaigns.filter((c) => c.featured);
-	const urgentCampaigns = campaigns.filter((c) => c.urgent);
+	const featuredCampaigns = allCampaigns.filter((c) => c.featured);
+	const urgentCampaigns = allCampaigns.filter((c) => c.urgent);
 
 	return (
 		<div className="min-h-[calc(100vh-4rem)] bg-background flex items-center justify-center">
@@ -330,7 +339,8 @@ function CampaignCard({ campaign }: { campaign: any }) {
 
 			<CardFooter className="flex gap-2">
 				<Button asChild className="flex-1">
-					<Link href={`/campaigns/${campaign.id}`}>View Details</Link>
+					{/* <Link href={`/campaigns/${campaign.id}`}>View Details</Link> */}
+					<Link href="/campaigns/data">View Details</Link>
 				</Button>
 				<Button variant="outline" size="icon">
 					<Heart className="h-4 w-4" />

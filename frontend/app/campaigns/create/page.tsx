@@ -148,12 +148,35 @@ export default function CreateCampaignPage() {
 			// Mock API call - replace with actual submission
 			await new Promise((resolve) => setTimeout(resolve, 2000));
 
+			// Get existing campaigns from localStorage
+			const existing = JSON.parse(localStorage.getItem("campaigns") || "[]");
+			const newId = existing.length + 6 + 1;
+			const newCampaign = {
+				id: newId.toString(),
+				title: formData.title,
+				description: formData.description,
+				image: uploadedImages[0] || "/placeholder.svg?height=200&width=400",
+				category: formData.category,
+				goal: Number(formData.goal),
+				raised: 0,
+				backers: 0,
+				daysLeft: Number(formData.duration),
+				location: formData.location,
+				organizer: user?.name || "Anonymous",
+				featured: false,
+				urgent: false,
+			};
+			localStorage.setItem(
+				"campaigns",
+				JSON.stringify([...existing, newCampaign])
+			);
+
 			toast({
 				title: "Campaign Created!",
 				description: "Your campaign has been submitted for review.",
 			});
 
-			router.push("/organizer/dashboard");
+			router.push("/user/dashboard");
 		} catch (error) {
 			toast({
 				title: "Error",
