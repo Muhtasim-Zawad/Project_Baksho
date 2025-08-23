@@ -107,6 +107,23 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
+	const approveCampaign = async (id: string) => {
+		setLoading(true);
+		try {
+			const res = await axiosPrivate.patch(`/api/campaigns/${id}/approve`);
+			if (res.status === 200) {
+				setCampaigns((prev) =>
+					prev.map((c) => (c.id === id ? { ...c, status: "active" } : c))
+				);
+			}
+		} catch (error) {
+			console.error("Failed to approve campaign:", error);
+			throw error;
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<CampaignContext.Provider
 			value={{
