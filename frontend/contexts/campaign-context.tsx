@@ -88,6 +88,10 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
+	useEffect(() => {
+		fetchCampaigns();
+	}, []);
+
 	return (
 		<CampaignContext.Provider
 			value={{
