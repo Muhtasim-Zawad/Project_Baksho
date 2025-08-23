@@ -14,7 +14,7 @@ const client = new Eureka({
     vipAddress: "user-service", // A virtual IP address for your service
     dataCenterInfo: {
       "@class": "com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
-      name: "default",
+      name: "MyOwn",
     },
     registerWithEureka: true,
     fetchRegistry: true,

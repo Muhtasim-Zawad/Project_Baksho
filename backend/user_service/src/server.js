@@ -10,15 +10,7 @@ import userRoutes from "./routes/userRoutes.js";
 import eurekaClient from "../eureka-config.js";
 
 const app = express();
-const PORT = process.env.PORT || 8000;
-
-app.get("/info", (req, res) => {
-  res.json({ status: "UP" });
-});
-
-app.get("/health", (req, res) => {
-  res.json({ status: "UP" });
-});
+const PORT = process.env.PORT || 5001;
 
 //middlewares
 app.use(express.json());
@@ -46,9 +38,18 @@ app.get("/", (req, res) => {
   res.send("Baksho is Running!!!");
 });
 
+app.get("/info", (req, res) => {
+  res.json({ status: "UP" });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "UP" });
+});
+
 app.listen(PORT, () => {
   console.log(`User service is running on port ${PORT}`);
   eurekaClient.start((error) => {
+    console.log("Eureka client started with error:", error);
     if (error) {
       console.log(error);
       console.log("Eureka registration failed:", error);
