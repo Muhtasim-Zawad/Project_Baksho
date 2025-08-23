@@ -124,6 +124,25 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
+	const rejectCampaign = async (id: string, reason?: string) => {
+		setLoading(true);
+		try {
+			const res = await axiosPrivate.patch(`/api/campaigns/${id}/reject`, {
+				reason,
+			});
+			if (res.status === 200) {
+				setCampaigns((prev) =>
+					prev.map((c) => (c.id === id ? { ...c, status: "failed" } : c))
+				);
+			}
+		} catch (error) {
+			console.error("Failed to reject campaign:", error);
+			throw error;
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<CampaignContext.Provider
 			value={{
