@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Calendar, MapPin, Users, Heart } from "lucide-react";
+import { useCampaign } from "@/contexts/campaign-context";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -193,6 +194,16 @@ export default function CampaignsPage() {
 		);
 		setAllCampaigns([...campaigns, ...localCampaigns]);
 	}, []);
+
+	// use this when backend is ready
+	// const { campaigns, loading, fetchCampaigns } = useCampaign();
+
+	// useEffect(() => {
+	// 	fetchCampaigns();
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, []);
+
+	// const allCampaigns = campaigns || [];
 
 	const filteredCampaigns = allCampaigns.filter((campaign) => {
 		const matchesSearch =
