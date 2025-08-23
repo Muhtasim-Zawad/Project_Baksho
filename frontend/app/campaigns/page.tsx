@@ -24,6 +24,41 @@ import { Search, Calendar, MapPin, Users, Heart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
+// // Campaign Model
+// interface Campaign {
+//   id: string;
+//   title: string;
+//   slug: string;
+//   description: string;
+//   story: string;
+//   category: string;
+//   tags: string[];
+//   goalAmount: number;
+//   currentAmount: number;
+//   currency: string;
+//   startDate: Date;
+//   endDate: Date;
+//   status: 'draft' | 'pending' | 'active' | 'completed' | 'suspended' | 'failed';
+//   isFeatured: boolean;
+//   isUrgent: boolean;
+//   risks: string;
+//   timeline: string;
+//   location: string;
+//   organizerId: string; // References User.id
+//   images: string[];
+//   videos?: string[];
+//   updates: CampaignUpdate[];
+//   faqs: FAQ[];
+//   stats: {
+//     backersCount: number;
+//     commentsCount: number;
+//     sharesCount: number;
+//     likesCount: number;
+//   };
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
+
 // Mock campaigns data
 const campaigns = [
 	{
@@ -31,8 +66,14 @@ const campaigns = [
 		title: "Help Build a School in Rural Kenya",
 		description:
 			"Providing quality education to 500+ children in underserved communities. This project will construct a modern school facility with proper classrooms, library, and computer lab.",
+		story: "",
 		image: "/placeholder.svg?height=200&width=400",
 		category: "Education",
+		tags: ["school", "children", "community"],
+		startDate: Date,
+		endDate: Date,
+		// status: 'draft' || 'pending' | 'active' | 'completed' | 'suspended' | 'failed',
+
 		goal: 50000,
 		raised: 32500,
 		backers: 234,
@@ -47,6 +88,7 @@ const campaigns = [
 		title: "Clean Water Initiative",
 		description:
 			"Installing water purification systems in 10 villages to provide clean drinking water to over 2000 families.",
+		story: "",
 		image: "/placeholder.svg?height=200&width=400",
 		category: "Health",
 		goal: 25000,
@@ -63,6 +105,7 @@ const campaigns = [
 		title: "Emergency Medical Fund",
 		description:
 			"Urgent medical treatment needed for children with rare diseases. Every donation helps save a life.",
+		story: "",
 		image: "/placeholder.svg?height=200&width=400",
 		category: "Health",
 		goal: 15000,
@@ -79,6 +122,7 @@ const campaigns = [
 		title: "Local Art Studio Renovation",
 		description:
 			"Transforming an old warehouse into a community art space where local artists can create and teach.",
+		story: "",
 		image: "/placeholder.svg?height=200&width=400",
 		category: "Creative",
 		goal: 12000,
@@ -95,6 +139,7 @@ const campaigns = [
 		title: "Tech Startup Launch",
 		description:
 			"Revolutionary app that connects local farmers with consumers directly, eliminating middlemen.",
+		story: "",
 		image: "/placeholder.svg?height=200&width=400",
 		category: "Business",
 		goal: 75000,
@@ -111,6 +156,7 @@ const campaigns = [
 		title: "Reforestation Project",
 		description:
 			"Planting 10,000 trees to combat climate change and restore natural habitats for wildlife.",
+		story: "",
 		image: "/placeholder.svg?height=200&width=400",
 		category: "Environment",
 		goal: 20000,

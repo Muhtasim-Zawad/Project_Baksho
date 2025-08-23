@@ -40,7 +40,7 @@ export default function LoginPage() {
 				description: "You have successfully logged in.",
 			});
 			router.push("/user/dashboard");
-		} catch (err:any) {
+		} catch (err: any) {
 			setError(err.message || "Invalid email or password");
 		}
 	};

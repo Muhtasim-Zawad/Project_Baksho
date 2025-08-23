@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
-import axios from 'axios'
+import axios from "axios";
 import { axiosPublic } from "@/hooks/useAxiosPublic";
 import { axiosPrivate } from "@/hooks/useAxiosPrivate";
 
@@ -35,8 +35,8 @@ interface AuthContextType {
 	register: (
 		email: string,
 		password: string,
-		name: string,
-		role: UserRole
+		name: string
+		//role: UserRole
 	) => Promise<void>;
 	logout: () => void;
 	loading: boolean;
@@ -57,14 +57,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			}
 
 			try {
-				const res = await axiosPrivate.get('/api/users/get-profile');
+				const res = await axiosPrivate.get("/api/users/get-profile");
 				if (res.status === 200) {
 					setUser(res.data);
 				}
 			} catch (error: any) {
 				console.error("Failed to fetch user profile:", error);
 				if (error.response?.status === 401) {
-					logout(); 
+					logout();
 				}
 			} finally {
 				setLoading(false);
@@ -74,17 +74,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		fetchUser();
 	}, []);
 
-
-
 	const login = async (email: string, password: string) => {
 		setLoading(true);
 		try {
-			const res = await axiosPublic.post('/api/users/auth/login', { email, password })
+			const res = await axiosPublic.post("/api/users/auth/login", {
+				email,
+				password,
+			});
 			if (res.status == 200) {
 				const { accessToken, refreshToken, user } = res?.data;
 
-				localStorage.setItem('accessToken', accessToken);
-				localStorage.setItem('refreshToken', refreshToken);
+				localStorage.setItem("accessToken", accessToken);
+				localStorage.setItem("refreshToken", refreshToken);
 				setUser(user);
 			}
 			console.log(res);
@@ -97,14 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
-	const register = async (
-		email: string,
-		password: string,
-		name: string
-	) => {
+	const register = async (email: string, password: string, name: string) => {
 		setLoading(true);
 		try {
-			const res = await axiosPublic.post('/api/users/auth/signup', {
+			const res = await axiosPublic.post("/api/users/auth/signup", {
 				email,
 				password,
 				name,
@@ -113,8 +110,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			if (res.status === 201) {
 				const { accessToken, refreshToken, user } = res.data;
 
-				localStorage.setItem('accessToken', accessToken);
-				localStorage.setItem('refreshToken', refreshToken);
+				localStorage.setItem("accessToken", accessToken);
+				localStorage.setItem("refreshToken", refreshToken);
 				setUser(user);
 			}
 		} catch (error: any) {
@@ -125,9 +122,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			setLoading(false);
 		}
 	};
-
-
-
 
 	const logout = () => {
 		setUser(null);
