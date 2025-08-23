@@ -7,8 +7,18 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
+const eurekaClient = require("../eureka-config");
+
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+app.get("/info", (req, res) => {
+  res.json({ status: "UP" });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "UP" });
+});
 
 //middlewares
 app.use(express.json());
@@ -37,5 +47,42 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`User service is running on port ${PORT}`);
+  eurekaClient.start((error) => {
+    if (error) {
+      console.log("Eureka registration failed:", error);
+    } else {
+      console.log("Eureka registration complete");
+    }
+  });
 });
+
+// Graceful shutdown
+
+function exitHandler(options, exitCode) {
+  if (options.cleanup) {
+    eurekaClient.stop((err) => {
+      if (err) {
+        console.error("Error deregistering from Eureka:", err);
+      } else {
+        console.log("Deregistered from Eureka");
+      }
+      process.exit();
+    });
+  }
+  if (exitCode || exitCode === 0) console.log(exitCode);
+  if (options.exit) process.exit();
+}
+
+// Do something when app is closing
+process.on("exit", exitHandler.bind(null, { cleanup: true }));
+
+// Catches ctrl+c event
+process.on("SIGINT", exitHandler.bind(null, { exit: true }));
+
+// Catches "kill pid" (for example: nodemon restart)
+process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));
+process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
+
+// Catches uncaught exceptions
+process.on("uncaughtException", exitHandler.bind(null, { exit: true }));
