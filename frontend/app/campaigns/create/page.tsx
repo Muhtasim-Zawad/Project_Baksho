@@ -150,7 +150,7 @@ export default function CreateCampaignPage() {
 
 			// Get existing campaigns from localStorage
 			const existing = JSON.parse(localStorage.getItem("campaigns") || "[]");
-			const newId = existing.length + 6 + 1;
+			const newId = existing.length + 6 + 1; // hardcoded for mock data, have to change this when connected to real DB
 			const newCampaign = {
 				id: newId.toString(),
 				title: formData.title,
