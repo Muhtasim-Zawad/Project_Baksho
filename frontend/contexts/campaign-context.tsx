@@ -143,6 +143,23 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 		}
 	};
 
+	const updateCampaignInfo = async (id: string, updates: Partial<Campaign>) => {
+		setLoading(true);
+		try {
+			const res = await axiosPrivate.patch(`/api/campaigns/${id}`, updates);
+			if (res.status === 200) {
+				setCampaigns((prev) =>
+					prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+				);
+			}
+		} catch (error) {
+			console.error("Failed to update campaign info:", error);
+			throw error;
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<CampaignContext.Provider
 			value={{
