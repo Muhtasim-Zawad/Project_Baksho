@@ -7,7 +7,7 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
-const eurekaClient = require("../eureka-config");
+import eurekaClient from "../eureka-config.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -50,6 +50,7 @@ app.listen(PORT, () => {
   console.log(`User service is running on port ${PORT}`);
   eurekaClient.start((error) => {
     if (error) {
+      console.log(error);
       console.log("Eureka registration failed:", error);
     } else {
       console.log("Eureka registration complete");
