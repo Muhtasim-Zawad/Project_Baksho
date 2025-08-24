@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = 'http://localhost:1234';
+const url = "http://localhost:1234";
 
 export const axiosPrivate = axios.create({
   baseURL: url,
@@ -18,5 +18,5 @@ axiosPrivate.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );

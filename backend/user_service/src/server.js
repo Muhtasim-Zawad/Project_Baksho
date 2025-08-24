@@ -9,22 +9,24 @@ import userRoutes from "./routes/userRoutes.js";
 
 import eurekaClient from "../eureka-config.js";
 
+// throw new Error("<<<<< TESTING IF DOCKER IS USING THE NEW CODE >>>>>");
+
 const app = express();
 const PORT = process.env.PORT || 5001;
 
 //middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:3000",
-    ],
-    credentials: true,
-  }),
-);
+// app.use(
+//   cors({
+//     origin: [
+//       "http://localhost:5173",
+//       "http://localhost:5174",
+//       "http://localhost:3000",
+//     ],
+//     credentials: true,
+//   }),
+// );
 
 //db connection
 connectDB();
