@@ -29,7 +29,8 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8761
 
 # Command to run the application
-CMD ["java","-XX:+IgnoreContainerSupport", "-jar", "app.jar"]
+# CMD ["java","-XX:+IgnoreContainerSupport", "-jar", "app.jar"]
+CMD ["java", "-XX:-UseContainerSupport", "-jar", "app.jar"]
 
 
 
