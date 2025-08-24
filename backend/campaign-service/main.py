@@ -1,24 +1,21 @@
-# main.py
 from contextlib import asynccontextmanager
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException, Header, Response, status
 from sqlmodel import Session
 import py_eureka_client.eureka_client as eureka_client
 
-# --- CORRECTED IMPORTS ---
 from db.session import create_db_and_tables, get_session
 from core.config import EUREKA_SERVER, APP_NAME, APP_HOST, APP_PORT
 from schemas.campaign import CampaignCreate, CampaignRead, CampaignUpdate
 from crud import campaign as campaign_crud
 from models.campaign import Campaign
-# -------------------------
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # On startup
+    # on startup
     print("Starting up...")
     create_db_and_tables()
-    # Register with Eureka
+    # register with eureka server
     await eureka_client.init_async(
         eureka_server=EUREKA_SERVER,
         app_name=APP_NAME,
@@ -26,7 +23,7 @@ async def lifespan(app: FastAPI):
         instance_host=APP_HOST
     )
     yield
-    # On shutdown
+    # on shutdown
     print("Shutting down...")
     await eureka_client.stop_async()
 
@@ -120,7 +117,6 @@ def update_existing_campaign(
     )
     return updated_campaign
 
-# --- NEW DELETE ENDPOINT ---
 @app.delete("/campaigns/{campaign_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_existing_campaign(
     campaign: Campaign = Depends(get_campaign_and_verify_owner), # Use the dependency
