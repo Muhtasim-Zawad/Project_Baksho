@@ -1,0 +1,23 @@
+# docker-compose.yml
+
+version: "3.9"
+
+services:
+  campaign-service:
+    build: .
+    container_name: campaign-service
+    ports:
+      - "8001:8001"
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    environment:
+      - EUREKA_SERVER=http://host.docker.internal:8761/eureka
+      - APP_HOST=campaign-service
+      - APP_PORT=8001
+
+    volumes:
+      # Persist the SQLite database in a dedicated host directory
+      # This avoids file permission issues and is a more robust approach.
+      - ./db_data:/app/db_data
