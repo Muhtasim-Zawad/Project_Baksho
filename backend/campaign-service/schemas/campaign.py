@@ -24,6 +24,21 @@ class CampaignCreate(SQLModel):
     image_urls: str # Comma-separated list of URLs
     incentive_tiers: List[IncentiveTierCreate] = []
 
+# --- NEW SCHEMA FOR UPDATES ---
+class CampaignUpdate(SQLModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    goal: Optional[float] = None
+    duration: Optional[int] = None
+    location: Optional[str] = None
+    story: Optional[str] = None
+    risks: Optional[str] = None
+    timeline: Optional[str] = None
+    image_urls: Optional[str] = None
+    # When updating, we expect a full list of new tiers to replace the old ones.
+    incentive_tiers: Optional[List[IncentiveTierCreate]] = None
+
 # Schema for reading an incentive tier (part of campaign response)
 class IncentiveTierRead(IncentiveTierCreate):
     id: int

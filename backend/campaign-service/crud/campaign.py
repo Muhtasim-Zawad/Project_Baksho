@@ -1,7 +1,7 @@
 # crud/campaign.py
 from sqlmodel import Session, select
 from models.campaign import Campaign, IncentiveTier # <-- Import IncentiveTier
-from schemas.campaign import CampaignCreate
+from schemas.campaign import CampaignCreate, CampaignUpdate
 
 def create_campaign(session: Session, campaign_create: CampaignCreate, organizer_id: str, organizer_name: str) -> Campaign:
     # 1. Extract the incentive tier data from the request payload
@@ -42,3 +42,33 @@ def get_all_campaigns(session: Session, skip: int = 0, limit: int = 100) -> list
     statement = select(Campaign).offset(skip).limit(limit)
     campaigns = session.exec(statement).all()
     return campaigns
+
+def update_campaign(session: Session, campaign: Campaign, campaign_update: CampaignUpdate) -> Campaign:
+    # Get the update data, excluding unset fields to avoid overwriting with None
+    update_data = campaign_update.model_dump(exclude_unset=True)
+
+    # Handle incentive tiers separately
+    if "incentive_tiers" in update_data:
+        # Clear existing tiers
+        campaign.incentive_tiers.clear()
+        # Create and add new tiers
+        new_tiers_data = update_data.pop("incentive_tiers")
+        for tier_data in new_tiers_data:
+            tier = IncentiveTier(**tier_data, campaign=campaign)
+            campaign.incentive_tiers.append(tier)
+            # No need to session.add(tier) due to the relationship cascade
+
+    # Update the remaining campaign fields
+    for key, value in update_data.items():
+        setattr(campaign, key, value)
+
+    session.add(campaign)
+    session.commit()
+    session.refresh(campaign)
+    return campaign
+
+# --- NEW DELETE FUNCTION ---
+def delete_campaign(session: Session, campaign: Campaign) -> None:
+    session.delete(campaign)
+    session.commit()
+    return

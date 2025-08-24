@@ -1,15 +1,16 @@
 # main.py
 from contextlib import asynccontextmanager
 from typing import List
-from fastapi import FastAPI, Depends, HTTPException, Header
+from fastapi import FastAPI, Depends, HTTPException, Header, Response, status
 from sqlmodel import Session
 import py_eureka_client.eureka_client as eureka_client
 
 # --- CORRECTED IMPORTS ---
 from db.session import create_db_and_tables, get_session
 from core.config import EUREKA_SERVER, APP_NAME, APP_HOST, APP_PORT
-from schemas.campaign import CampaignCreate, CampaignRead
+from schemas.campaign import CampaignCreate, CampaignRead, CampaignUpdate
 from crud import campaign as campaign_crud
+from models.campaign import Campaign
 # -------------------------
 
 @asynccontextmanager
@@ -35,6 +36,20 @@ app = FastAPI(
     description="Microservice to manage crowdfunding campaigns.",
     version="1.0.0"
 )
+
+# dependency for checking campaign ownership
+def get_campaign_and_verify_owner(
+    campaign_id: int,
+    session: Session = Depends(get_session),
+    x_user_id: str = Header(...)
+) -> Campaign:
+    campaign = campaign_crud.get_campaign_by_id(session=session, campaign_id=campaign_id)
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    if campaign.organizer_id != x_user_id:
+        # In a real app, you might also allow admins to perform these actions
+        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
+    return campaign
 
 # --- API Endpoints ---
 
@@ -88,3 +103,19 @@ def get_single_campaign(
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
     return campaign
+
+@app.put("/campaigns/{campaign_id}", response_model=CampaignRead)
+def update_existing_campaign(
+    campaign_update_data: CampaignUpdate,
+    campaign: Campaign = Depends(get_campaign_and_verify_owner), # Use the dependency
+    session: Session = Depends(get_session)
+):
+    """
+    Update an existing campaign. Only the campaign owner can perform this action.
+    """
+    updated_campaign = campaign_crud.update_campaign(
+        session=session,
+        campaign=campaign,
+        campaign_update=campaign_update_data
+    )
+    return updated_campaign
