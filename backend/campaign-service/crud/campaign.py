@@ -1,32 +1,33 @@
 # crud/campaign.py
 from sqlmodel import Session, select
-from models.campaign import Campaign, IncentiveTier # <-- Import IncentiveTier
+from models.campaign import Campaign, IncentiveTier
 from schemas.campaign import CampaignCreate, CampaignUpdate
 
 def create_campaign(session: Session, campaign_create: CampaignCreate, organizer_id: str, organizer_name: str) -> Campaign:
-    # 1. Extract the incentive tier data from the request payload
+    # extract tehe incentive tier data the payload
     incentive_tiers_data = campaign_create.incentive_tiers
 
-    # 2. Create a dictionary for the main campaign data, excluding the tiers
+    # 2. create a dictionary for the main campaign data, excluding the tiers
     campaign_data = campaign_create.model_dump(exclude={"incentive_tiers"})
 
-    # 3. Create the main Campaign object
+    # 3. create the main Campaign object
     campaign = Campaign(
         **campaign_data,
         organizer_id=organizer_id,
         organizer_name=organizer_name
     )
 
-    # 4. Manually create IncentiveTier model instances and link them to the campaign
+    # 4. manually create IncentiveTier model instances and link them to the campaign
     for tier_data in incentive_tiers_data:
         tier = IncentiveTier(
             **tier_data.model_dump(),
-            campaign=campaign  # This links the tier to the parent campaign
+            campaign=campaign  # this links the tier to the parent campaign
         )
-        # SQLAlchemy will automatically handle adding this to the session
-        # when the parent `campaign` is added, thanks to the relationship setup.
+        ## note: we don't need to call session.add(tier) here
+        # Thanks to SQLAlchemy's relationship configuration, tier objects
+        # are automatically added to the session with the parent campaign
 
-    # 5. Add the campaign (with its linked tiers) to the session and commit
+    # 5. add the campaign (with its linked tiers) to the session and commit
     session.add(campaign)
     session.commit()
     session.refresh(campaign)
@@ -67,7 +68,6 @@ def update_campaign(session: Session, campaign: Campaign, campaign_update: Campa
     session.refresh(campaign)
     return campaign
 
-# --- NEW DELETE FUNCTION ---
 def delete_campaign(session: Session, campaign: Campaign) -> None:
     session.delete(campaign)
     session.commit()
