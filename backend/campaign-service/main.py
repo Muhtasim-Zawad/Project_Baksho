@@ -119,3 +119,15 @@ def update_existing_campaign(
         campaign_update=campaign_update_data
     )
     return updated_campaign
+
+# --- NEW DELETE ENDPOINT ---
+@app.delete("/campaigns/{campaign_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_existing_campaign(
+    campaign: Campaign = Depends(get_campaign_and_verify_owner), # Use the dependency
+    session: Session = Depends(get_session)
+):
+    """
+    Delete an existing campaign. Only the campaign owner can perform this action.
+    """
+    campaign_crud.delete_campaign(session=session, campaign=campaign)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
