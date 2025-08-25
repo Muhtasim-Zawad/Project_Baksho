@@ -1,9 +1,10 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios"; // Make sure to install axios: npm install axios
+
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, X, Plus, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const API_BASE_URL = "http://localhost:8080";
+
 const categories = [
   "Education",
   "Health",
@@ -42,7 +45,7 @@ const categories = [
 ];
 
 interface IncentiveTier {
-  id: string;
+  id: string; // Client-side only ID
   amount: number;
   title: string;
   description: string;
@@ -51,7 +54,7 @@ interface IncentiveTier {
 }
 
 export default function CreateCampaignPage() {
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth(); // Destructure accessToken from auth context
   const router = useRouter();
   const { toast } = useToast();
 
@@ -77,43 +80,51 @@ export default function CreateCampaignPage() {
     quantity: undefined,
   });
 
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  // This state will hold URLs of images after they have been uploaded.
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // if (!user) {
-  // 	return (
-  // 		<div className="min-h-screen flex items-center justify-center">
-  // 			<Card className="w-full max-w-md">
-  // 				<CardHeader>
-  // 					<CardTitle>Authentication Required</CardTitle>
-  // 					<CardDescription>
-  // 						Please log in to create a campaign
-  // 					</CardDescription>
-  // 				</CardHeader>
-  // 				<CardContent>
-  // 					<Button asChild className="w-full">
-  // 						<a href="/login">Log In</a>
-  // 					</Button>
-  // 				</CardContent>
-  // 			</Card>
-  // 		</div>
-  // 	);
-  // }
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Authentication Required</CardTitle>
+            <CardDescription>
+              Please log in to create a campaign
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
+              <a href="/login">Log In</a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      // Mock image upload - in real app, upload to cloud storage
+      // --- REAL IMPLEMENTATION ---
+      // In a real application, you would upload each file to your backend or a
+      // service like S3, Cloudinary, etc. The service would return a URL.
+      // For example:
+      // const uploadPromises = Array.from(files).map(file => uploadFile(file));
+      // const urls = await Promise.all(uploadPromises);
+      // setUploadedImageUrls([...uploadedImageUrls, ...urls]);
+
+      // --- MOCK IMPLEMENTATION (for demonstration) ---
       const newImages = Array.from(files).map(
-        (file, index) =>
-          `/placeholder.svg?height=200&width=400&text=${file.name}`,
+        (file) => `/placeholder.svg?height=200&width=400&text=${file.name}`,
       );
-      setUploadedImages([...uploadedImages, ...newImages]);
+      setUploadedImageUrls([...uploadedImageUrls, ...newImages]);
     }
   };
 
   const removeImage = (index: number) => {
-    setUploadedImages(uploadedImages.filter((_, i) => i !== index));
+    setUploadedImageUrls(uploadedImageUrls.filter((_, i) => i !== index));
   };
 
   const addIncentiveTier = () => {
@@ -142,45 +153,67 @@ export default function CreateCampaignPage() {
   };
 
   const handleSubmit = async () => {
+    if (!accessToken) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to create a campaign.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsSubmitting(true);
 
-    try {
-      // Mock API call - replace with actual submission
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Map frontend state to the backend API payload structure
+    const campaignData = {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      goal: Number(formData.goal),
+      duration: Number(formData.duration),
+      location: formData.location,
+      story: formData.story,
+      risks: formData.risks,
+      timeline: formData.timeline,
+      image_urls: uploadedImageUrls.join(","), // Join URLs into a comma-separated string
+      incentive_tiers: incentiveTiers.map((tier) => ({
+        // Map to the structure expected by the backend
+        amount: tier.amount,
+        title: tier.title,
+        description: tier.description,
+      })),
+    };
 
-      // Get existing campaigns from localStorage
-      const existing = JSON.parse(localStorage.getItem("campaigns") || "[]");
-      const newId = existing.length + 6 + 1; // hardcoded for mock data, have to change this when connected to real DB
-      const newCampaign = {
-        id: newId.toString(),
-        title: formData.title,
-        description: formData.description,
-        image: uploadedImages[0] || "/placeholder.svg?height=200&width=400",
-        category: formData.category,
-        goal: Number(formData.goal),
-        raised: 0,
-        backers: 0,
-        daysLeft: Number(formData.duration),
-        location: formData.location,
-        organizer: user?.name || "Anonymous",
-        featured: false,
-        urgent: false,
-      };
-      localStorage.setItem(
-        "campaigns",
-        JSON.stringify([...existing, newCampaign]),
+    try {
+      // Make the API call to the backend
+      const response = await axios.post(
+        `${API_BASE_URL}/campaigns/`,
+        campaignData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // Add the JWT token to the header
+          },
+        },
       );
 
-      toast({
-        title: "Campaign Created!",
-        description: "Your campaign has been submitted for review.",
-      });
-
-      router.push("/user/dashboard");
+      if (response.status === 200 || response.status === 201) {
+        toast({
+          title: "Campaign Created!",
+          description: "Your campaign has been successfully submitted.",
+        });
+        router.push("/user/dashboard"); // Redirect to dashboard on success
+      } else {
+        throw new Error("Failed to create campaign");
+      }
     } catch (error) {
+      console.error("Campaign submission error:", error);
+      const errorMessage =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "An unknown error occurred. Please try again.";
+
       toast({
         title: "Error",
-        description: "Failed to create campaign. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -401,9 +434,9 @@ export default function CreateCampaignPage() {
                     </div>
                   </div>
 
-                  {uploadedImages.length > 0 && (
+                  {uploadedImageUrls.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                      {uploadedImages.map((image, index) => (
+                      {uploadedImageUrls.map((image, index) => (
                         <div key={index} className="relative">
                           <img
                             src={image || "/placeholder.svg"}
@@ -525,7 +558,7 @@ export default function CreateCampaignPage() {
                     <Label htmlFor="tierDelivery">Estimated Delivery</Label>
                     <Input
                       id="tierDelivery"
-                      placeholder="March 2024"
+                      placeholder="March 2026"
                       value={newTier.estimatedDelivery || ""}
                       onChange={(e) =>
                         setNewTier({
@@ -633,7 +666,7 @@ export default function CreateCampaignPage() {
                     <h3 className="font-semibold mb-2">Media</h3>
                     <div className="bg-muted/50 rounded-lg p-4">
                       <p className="text-sm">
-                        {uploadedImages.length} images uploaded
+                        {uploadedImageUrls.length} images uploaded
                       </p>
                     </div>
                   </div>
