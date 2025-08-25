@@ -1,0 +1,58 @@
+services:
+  service-registry:
+    build: ./service-registry
+    container_name: service-registry
+    ports:
+      - "8761:8761"
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  user-service:
+    build: ./user_service
+    container_name: user-service
+    ports:
+      - "5001:5001"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/user-service_db
+      - JWT_SECRET=T7bH5KSsPtfAvaTJZpHjZ1NDwGADMxUA
+      - EUREKA_HOST=service-registry
+      - EUREKA_PORT=8761
+    depends_on:
+      - mongodb
+      - service-registry
+
+  campaign-service:
+    build: ./campaign-service
+    container_name: campaign-service
+    ports:
+      - "8001:8001"
+    environment:
+      - EUREKA_SERVER=http://service-registry:8761/eureka
+      - APP_HOST=campaign-service
+      - APP_PORT=8001
+    volumes:
+      - ./campaign-service/db_data:/app/db_data
+    depends_on:
+      - service-registry
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_SERVER_URL=http://service-registry:8761/eureka
+      - JWT_SECRET=T7bH5KSsPtfAvaTJZpHjZ1NDwGADMxUA
+    depends_on:
+      - service-registry
+      - user-service
+      - campaign-service
+
+volumes:
+  mongo-data:

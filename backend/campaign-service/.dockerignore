@@ -1,0 +1,28 @@
+# .dockerignore
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Python virtual environment
+.venv
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database file (managed by volume)
+# campaigns.db # Commented out so it gets copied on first build if exists
+
+# IDE / Editor specific
+.idea/
+.vscode/
