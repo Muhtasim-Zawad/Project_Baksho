@@ -412,7 +412,6 @@ function CampaignCard({ campaign }: { campaign: any }) {
 
       <CardFooter className="flex gap-2">
         <Button asChild className="flex-1">
-          {/* <Link href={`/campaigns/${campaign.id}`}>View Details</Link> */}
           <Link href={`/campaigns/${campaign.id}`}>View Details</Link>
         </Button>
         <Button variant="outline" size="icon">
