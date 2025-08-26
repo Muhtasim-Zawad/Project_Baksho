@@ -3,8 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios"; // Make sure to install axios: npm install axios
-
+import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,8 +29,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, X, Plus, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const API_BASE_URL = "http://localhost:8080";
+import axios from "axios";
 
 const categories = [
   "Education",
@@ -45,7 +43,7 @@ const categories = [
 ];
 
 interface IncentiveTier {
-  id: string; // Client-side only ID
+  id: string;
   amount: number;
   title: string;
   description: string;
@@ -54,7 +52,10 @@ interface IncentiveTier {
 }
 
 export default function CreateCampaignPage() {
-  const { user, accessToken } = useAuth(); // Destructure accessToken from auth context
+  // =================================================================
+  // STEP 1: ALL HOOKS MUST BE CALLED HERE, AT THE TOP.
+  // =================================================================
+  const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -70,7 +71,6 @@ export default function CreateCampaignPage() {
     risks: "",
     timeline: "",
   });
-
   const [incentiveTiers, setIncentiveTiers] = useState<IncentiveTier[]>([]);
   const [newTier, setNewTier] = useState<Partial<IncentiveTier>>({
     amount: 0,
@@ -79,24 +79,26 @@ export default function CreateCampaignPage() {
     estimatedDelivery: "",
     quantity: undefined,
   });
-
-  // This state will hold URLs of images after they have been uploaded.
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // =================================================================
+  // STEP 2: NOW, YOU CAN HAVE YOUR CONDITIONAL RETURN.
+  // =================================================================
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Authentication Required</CardTitle>
             <CardDescription>
-              Please log in to create a campaign
+              Please log in to create a campaign.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <a href="/login">Log In</a>
+              <Link href="/login">Log In</Link>
             </Button>
           </CardContent>
         </Card>
@@ -106,21 +108,35 @@ export default function CreateCampaignPage() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      // --- REAL IMPLEMENTATION ---
-      // In a real application, you would upload each file to your backend or a
-      // service like S3, Cloudinary, etc. The service would return a URL.
-      // For example:
-      // const uploadPromises = Array.from(files).map(file => uploadFile(file));
-      // const urls = await Promise.all(uploadPromises);
-      // setUploadedImageUrls([...uploadedImageUrls, ...urls]);
+    if (!files || files.length === 0) return;
 
-      // --- MOCK IMPLEMENTATION (for demonstration) ---
-      const newImages = Array.from(files).map(
-        (file) => `/placeholder.svg?height=200&width=400&text=${file.name}`,
-      );
-      setUploadedImageUrls([...uploadedImageUrls, ...newImages]);
-    }
+    setIsUploading(true);
+    const uploadPromises = Array.from(files).map(async (file) => {
+      try {
+        const { data } = await axios.post("/api/s3-upload", {
+          fileName: file.name,
+          fileType: file.type,
+        });
+        const { signedUrl, fileUrl } = data;
+        await axios.put(signedUrl, file, {
+          headers: { "Content-Type": file.type },
+        });
+        return fileUrl;
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        toast({
+          title: "Upload Failed",
+          description: `Could not upload ${file.name}.`,
+          variant: "destructive",
+        });
+        return null;
+      }
+    });
+
+    const urls = await Promise.all(uploadPromises);
+    const successfulUrls = urls.filter((url): url is string => url !== null);
+    setUploadedImageUrls((prevUrls) => [...prevUrls, ...successfulUrls]);
+    setIsUploading(false);
   };
 
   const removeImage = (index: number) => {
@@ -153,67 +169,38 @@ export default function CreateCampaignPage() {
   };
 
   const handleSubmit = async () => {
-    if (!accessToken) {
-      toast({
-        title: "Authentication Error",
-        description: "You must be logged in to create a campaign.",
-        variant: "destructive",
-      });
-      return;
-    }
     setIsSubmitting(true);
-
-    // Map frontend state to the backend API payload structure
-    const campaignData = {
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      goal: Number(formData.goal),
-      duration: Number(formData.duration),
-      location: formData.location,
-      story: formData.story,
-      risks: formData.risks,
-      timeline: formData.timeline,
-      image_urls: uploadedImageUrls.join(","), // Join URLs into a comma-separated string
-      incentive_tiers: incentiveTiers.map((tier) => ({
-        // Map to the structure expected by the backend
-        amount: tier.amount,
-        title: tier.title,
-        description: tier.description,
-      })),
-    };
-
     try {
-      // Make the API call to the backend
-      const response = await axios.post(
-        `${API_BASE_URL}/campaigns/`,
-        campaignData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`, // Add the JWT token to the header
-          },
-        },
+      const existing = JSON.parse(localStorage.getItem("campaigns") || "[]");
+      const newId = (existing.length + 6 + 1).toString(); //needs to update this
+      const newCampaign = {
+        id: newId,
+        ...formData,
+        goal: Number(formData.goal),
+        raised: 0,
+        backers: 0,
+        daysLeft: Number(formData.duration),
+        organizer: user?.name || "Anonymous",
+        featured: false,
+        urgent: false,
+        image: uploadedImageUrls.join(","),
+        image_urls: uploadedImageUrls.join(","),
+        incentive_tiers: incentiveTiers,
+      };
+      console.log(newCampaign);
+      localStorage.setItem(
+        "campaigns",
+        JSON.stringify([...existing, newCampaign]),
       );
-
-      if (response.status === 200 || response.status === 201) {
-        toast({
-          title: "Campaign Created!",
-          description: "Your campaign has been successfully submitted.",
-        });
-        router.push("/user/dashboard"); // Redirect to dashboard on success
-      } else {
-        throw new Error("Failed to create campaign");
-      }
+      toast({
+        title: "Campaign Created!",
+        description: "Your campaign has been submitted for review.",
+      });
+      router.push("/user/dashboard");
     } catch (error) {
-      console.error("Campaign submission error:", error);
-      const errorMessage =
-        axios.isAxiosError(error) && error.response?.data?.message
-          ? error.response.data.message
-          : "An unknown error occurred. Please try again.";
-
       toast({
         title: "Error",
-        description: errorMessage,
+        description: "Failed to create campaign. Please try again.",
         variant: "destructive",
       });
     } finally {

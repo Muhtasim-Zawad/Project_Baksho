@@ -103,8 +103,9 @@ services:
     volumes:
       - minio_data:/data
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: 12345678
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=12345678
+      - MINIO_BROWSER_CORS_ALLOW_ORIGIN=http://localhost:3000
     command: server /data --console-address ":9001"
     networks:
       - baksho-net
