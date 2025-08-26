@@ -170,11 +170,14 @@ export default function CampaignDetailsPage({
     });
   };
 
-  const getImageUrl = (imageUrls: string | undefined): string => {
-    if (!imageUrls) return "/placeholder.svg?height=400&width=600";
+  const getImageUrls = (imageUrls: string | undefined): string[] => {
+    if (!imageUrls) return ["/placeholder.svg?height=400&width=600"];
 
-    const urls = imageUrls.split(",");
-    return urls[0]?.trim() || "/placeholder.svg?height=400&width=600";
+    const urls = imageUrls
+      .split(",")
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0);
+    return urls.length > 0 ? urls : ["/placeholder.svg?height=400&width=600"];
   };
 
   // Loading state
@@ -210,7 +213,7 @@ export default function CampaignDetailsPage({
     campaign.created_at || "",
     campaign.duration,
   );
-  const imageUrl = getImageUrl(campaign.image_urls);
+  const imageUrls = getImageUrls(campaign.image_urls);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -253,28 +256,87 @@ export default function CampaignDetailsPage({
               </div>
             </div>
 
-            {/* Campaign Image */}
+            {/* Campaign Images */}
             <div className="relative">
-              <Image
-                src={imageUrl}
-                alt={campaign.title}
-                width={600}
-                height={400}
-                className="w-full h-64 md:h-96 object-cover rounded-lg"
-              />
-              <div className="absolute top-4 right-4 flex space-x-2">
-                <Button variant="secondary" size="sm">
-                  <Heart className="h-4 w-4 mr-1" />
-                  Save
-                </Button>
-                <Button variant="secondary" size="sm">
-                  <Share2 className="h-4 w-4 mr-1" />
-                  Share
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <Flag className="h-4 w-4" />
-                </Button>
-              </div>
+              {imageUrls.length === 1 ? (
+                // Single image display
+                <div className="relative">
+                  <Image
+                    src={imageUrls[0]}
+                    alt={campaign.title}
+                    width={600}
+                    height={400}
+                    className="w-full h-64 md:h-96 object-cover rounded-lg"
+                  />
+                  <div className="absolute top-4 right-4 flex space-x-2">
+                    <Button variant="secondary" size="sm">
+                      <Heart className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                    <Button variant="secondary" size="sm">
+                      <Share2 className="h-4 w-4 mr-1" />
+                      Share
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <Flag className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Multiple images display
+                <div>
+                  {/* Main image */}
+                  <div className="relative mb-4">
+                    <Image
+                      src={imageUrls[0]}
+                      alt={`${campaign.title} - Main image`}
+                      width={600}
+                      height={400}
+                      className="w-full h-64 md:h-80 object-cover rounded-lg"
+                    />
+                    <div className="absolute top-4 right-4 flex space-x-2">
+                      <Button variant="secondary" size="sm">
+                        <Heart className="h-4 w-4 mr-1" />
+                        Save
+                      </Button>
+                      <Button variant="secondary" size="sm">
+                        <Share2 className="h-4 w-4 mr-1" />
+                        Share
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Flag className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {imageUrls.length > 1 && (
+                      <div className="absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded text-sm">
+                        1 / {imageUrls.length}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Additional images grid */}
+                  {imageUrls.length > 1 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {imageUrls.slice(1).map((url, index) => (
+                        <div key={index + 1} className="relative group">
+                          <Image
+                            src={url}
+                            alt={`${campaign.title} - Image ${index + 2}`}
+                            width={200}
+                            height={150}
+                            className="w-full h-24 md:h-32 object-cover rounded-lg cursor-pointer transition-opacity group-hover:opacity-80"
+                            onClick={() => {
+                              // You can implement a modal/lightbox here
+                              console.log(`Clicked image ${index + 2}`);
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-colors" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Campaign Tabs */}
