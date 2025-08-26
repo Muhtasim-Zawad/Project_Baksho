@@ -171,6 +171,7 @@ export default function CreateCampaignPage() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      const accessToken = localStorage.getItem("accessToken");
       const existing = JSON.parse(localStorage.getItem("campaigns") || "[]");
       const newId = (existing.length + 6 + 1).toString(); //needs to update this
       const newCampaign = {
@@ -188,19 +189,33 @@ export default function CreateCampaignPage() {
         incentive_tiers: incentiveTiers,
       };
       console.log(newCampaign);
-      localStorage.setItem(
-        "campaigns",
-        JSON.stringify([...existing, newCampaign]),
-      );
+      const response = await fetch("http://localhost:8080/campaigns/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(newCampaign),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create campaign.");
+      }
+
       toast({
         title: "Campaign Created!",
         description: "Your campaign has been submitted for review.",
       });
+
       router.push("/user/dashboard");
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create campaign. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unknown error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
