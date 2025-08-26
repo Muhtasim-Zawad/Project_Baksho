@@ -40,7 +40,10 @@ def get_campaign_by_id(session: Session, campaign_id: int) -> Campaign | None:
     return campaign
 
 def get_all_campaigns(session: Session, skip: int = 0, limit: int = 100) -> list[Campaign]:
-    statement = select(Campaign).offset(skip).limit(limit)
+    """
+    Retrieves a list of approved campaigns with pagination.
+    """
+    statement = select(Campaign).where(Campaign.approved == True).offset(skip).limit(limit)
     campaigns = session.exec(statement).all()
     return campaigns
 

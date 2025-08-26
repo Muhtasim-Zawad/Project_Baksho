@@ -36,6 +36,8 @@ class Campaign(SQLModel, table=True):
     featured: bool = Field(default=False)
     urgent: bool = Field(default=False)
 
+    approved: bool = Field(default=False)
+
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
     # Relationships
