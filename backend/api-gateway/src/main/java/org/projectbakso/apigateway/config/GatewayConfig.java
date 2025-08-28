@@ -89,4 +89,17 @@ public class GatewayConfig {
             )
             .build(); // No filter applied
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> publicNotificationRoutes() {
+        return GatewayRouterFunctions.route("public-notification-service")
+                .route(
+                        // Matches ALL GET requests under /campaigns/, including /campaigns and /campaigns/{id}
+                        RequestPredicates.GET("/notifications/**"),
+                        HandlerFunctions.http(
+                                URI.create("http://notification-service:8000")
+                        )
+                )
+                .build(); // No filter applied
+    }
 }
