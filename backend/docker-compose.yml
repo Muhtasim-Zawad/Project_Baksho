@@ -110,6 +110,23 @@ services:
     networks:
       - baksho-net
 
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set myminio http://minio:9000 admin 12345678) do
+        echo 'Waiting for MinIO...';
+        sleep 3;
+      done;
+      /usr/bin/mc mb -p myminio/campaign-images;
+      /usr/bin/mc anonymous set public myminio/campaign-images;
+      exit 0;
+      "
+    networks:
+      - baksho-net
+
   sqlite-web:
     image: coleifer/sqlite-web
     container_name: sqlite-web
