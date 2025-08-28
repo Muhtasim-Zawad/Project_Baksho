@@ -6,6 +6,7 @@ import org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctio
 import org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -20,20 +21,6 @@ public class GatewayConfig {
 
     public GatewayConfig(AuthenticationFilter authenticationFilter) {
         this.authenticationFilter = authenticationFilter;
-    }
-
-    @Bean
-    public CorsFilter corsFilter() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("*"); // Allow all origins (use specific origins in prod)
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
     }
 
     // A dedicated, UNFILTERED route for public authentication endpoints
@@ -62,16 +49,44 @@ public class GatewayConfig {
             .build();
     }
 
+    // --- Revised Campaign Routes ---
+
+    /**
+     * PROTECTED routes for campaign write operations (POST, PUT, DELETE).
+     * These require authentication.
+     */
     @Bean
-    public RouterFunction<ServerResponse> campaignServiceRoute() {
-        return GatewayRouterFunctions.route("campaign-service")
+    public RouterFunction<ServerResponse> protectedCampaignRoutes() {
+        return GatewayRouterFunctions.route("protected-campaign-service")
             .route(
-                RequestPredicates.path("/campaigns/**"),
+                // Matches any POST, PUT, or DELETE request under /campaigns/
+                RequestPredicates.path("/campaigns/**").and(
+                    RequestPredicates.method(HttpMethod.POST)
+                        .or(RequestPredicates.method(HttpMethod.PUT))
+                        .or(RequestPredicates.method(HttpMethod.DELETE))
+                ),
                 HandlerFunctions.http(
                     URI.create("http://campaign-service:8001")
                 )
             )
-            .filter(authenticationFilter.apply()) // Assuming all campaign routes are protected
+            .filter(authenticationFilter.apply()) // The filter is ONLY applied here
             .build();
+    }
+
+    /**
+     * PUBLIC routes for campaign read operations (GET).
+     * These are publicly accessible and do not require authentication.
+     */
+    @Bean
+    public RouterFunction<ServerResponse> publicCampaignRoutes() {
+        return GatewayRouterFunctions.route("public-campaign-service")
+            .route(
+                // Matches ALL GET requests under /campaigns/, including /campaigns and /campaigns/{id}
+                RequestPredicates.GET("/campaigns/**"),
+                HandlerFunctions.http(
+                    URI.create("http://campaign-service:8001")
+                )
+            )
+            .build(); // No filter applied
     }
 }
