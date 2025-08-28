@@ -60,6 +60,26 @@ services:
     networks:
       - baksho-net
 
+  notification-service:
+    build: ./notification-service # Assumes your FastAPI service is in the 'notification-service' directory
+    container_name: notification-service
+    ports:
+      - "8002:8002"
+    environment:
+      # This URL points to the database file inside the container's volume
+      - DATABASE_URL=sqlite:///./db_data/notifications.db
+      # Environment variables for service discovery with Eureka
+      - EUREKA_SERVER=http://service-registry:8761/eureka
+      - APP_HOST=notification-service
+      - APP_PORT=8000
+    volumes:
+      - notification-db-data:/app/db_data # Persists the SQLite database
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    networks:
+      - baksho-net
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -74,6 +94,8 @@ services:
       user-service:
         condition: service_started
       campaign-service:
+        condition: service_started
+      notification-service: # Added dependency on the new service
         condition: service_started
     networks:
       - baksho-net
@@ -98,8 +120,8 @@ services:
     image: minio/minio
     container_name: minio
     ports:
-      - "9000:9000" # API port
-      - "9001:9001" # Console port
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
     environment:
@@ -110,21 +132,34 @@ services:
     networks:
       - baksho-net
 
-  sqlite-web:
+  campaign-sqlite-web:
     image: coleifer/sqlite-web
-    container_name: sqlite-web
+    container_name: campaign-sqlite-web
     ports:
       - "8082:8080"
     volumes:
-      - ./campaign-service/db_data:/data # same volume as your SQLite db
+      - ./campaign-service/db_data:/data
     environment:
       - SQLITE_DATABASE=/data/campaigns.db
+    networks:
+      - baksho-net
+
+  notification-sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: notification-sqlite-web
+    ports:
+      - "8083:8080" # New port on the host to avoid conflicts
+    volumes:
+      - notification-db-data:/data # Mounts the notification service's volume
+    environment:
+      - SQLITE_DATABASE=/data/notifications.db # Points to the notification db
     networks:
       - baksho-net
 
 volumes:
   mongo-data:
   minio_data:
+  notification-db-data: # Added volume for notification service's database
 
 networks:
   baksho-net:

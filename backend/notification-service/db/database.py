@@ -1,8 +1,9 @@
 # db/database.py
 from sqlmodel import create_engine, SQLModel, Session
-from core.config import settings
 
-engine = create_engine(settings.DATABASE_URL, echo=True)
+DATABASE_URL: str = "sqlite:///db_data/notifications.db"
+
+engine = create_engine(DATABASE_URL, echo=True)
 
 def init_db():
     SQLModel.metadata.create_all(engine)

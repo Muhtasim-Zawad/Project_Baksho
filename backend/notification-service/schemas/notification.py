@@ -6,6 +6,7 @@ import datetime
 class NotificationBase(BaseModel):
     user_id: str
     notification: str
+    url : str
 
 class NotificationCreate(NotificationBase):
     pass
