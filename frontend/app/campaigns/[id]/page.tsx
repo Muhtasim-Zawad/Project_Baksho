@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import PaymentForm from "@/components/payment/PaymentForm";
 
 // Types
 interface IncentiveTier {
@@ -529,6 +530,10 @@ export default function CampaignDetailsPage({
                       >
                         Donate Now
                       </Button>
+
+                      {/* -----------Payment Form------------------ */}
+                      <PaymentForm />
+                      {/* -----------Payment Form------------------ */}
 
                       <Button
                         variant="outline"
