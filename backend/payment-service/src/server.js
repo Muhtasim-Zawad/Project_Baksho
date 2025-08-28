@@ -22,7 +22,7 @@ const db = mysql.createConnection({
     user: DB_USER,
     password: DB_PASSWORD,
     database: DB_NAME
-})
+});
 
 db.connect((err) => {
     if (err) {
@@ -30,8 +30,29 @@ db.connect((err) => {
         return;
     }
     console.log("✅ Connected to MySQL database!");
-});
 
+    // Create payments table if it doesn't exist
+    const createPaymentsTable = `
+        CREATE TABLE IF NOT EXISTS payments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            campaign_id INT NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            currency VARCHAR(10) NOT NULL,
+            payment_status VARCHAR(50) NOT NULL,
+            payment_intent_id VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `;
+
+    db.query(createPaymentsTable, (err, result) => {
+        if (err) {
+            console.error("Error creating payments table:", err);
+        } else {
+            console.log("✅ Payments table is ready!");
+        }
+    });
+});
 
 app.post("/create-payment-intent", async (req, res) => {
     const { price } = req.body;
@@ -50,18 +71,39 @@ app.post("/create-payment-intent", async (req, res) => {
 
 app.post("/payments", async (req, res) => {
     const paymentInfo = req.body;
-    console.log(paymentInfo);
-    // const query = { _id: new ObjectId(paymentInfo.classId) };
-    // const updateDoc = {
-    //     $inc: {
-    //         enroll: 1,
-    //     },
-    // };
-    // await classCollection.updateOne(query, updateDoc);
+    const { campaignId, userId, amount, currency, paymentIntentId, status } = paymentInfo;
 
-    // const result = await paymentCollection.insertOne(paymentInfo);
-    // res.send(result);
+    if (!campaignId || !userId || !amount || !currency || !status) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+        const insertQuery = `
+            INSERT INTO payments (user_id, campaign_id, amount, currency, payment_status, payment_intent_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        db.query(
+            insertQuery,
+            [userId, campaignId, amount, currency, status, paymentIntentId],
+            (err, result) => {
+                if (err) {
+                    console.error("Error inserting payment:", err);
+                    return res.status(500).json({ error: err.message });
+                }
+
+                res.json({
+                    message: "Payment recorded successfully",
+                    paymentId: result.insertId
+                });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Server error" });
+    }
+
 });
+
 
 
 app.get('/', (req, res) => {
