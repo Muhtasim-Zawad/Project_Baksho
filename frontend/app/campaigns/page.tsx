@@ -3,21 +3,21 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Calendar, MapPin, Users, Heart } from "lucide-react";
@@ -177,247 +177,247 @@ import { axiosPublic } from "@/hooks/useAxiosPublic";
 // let campaigns;
 
 const categories = [
-  "All",
-  "Education",
-  "Health",
-  "Business",
-  "Creative",
-  "Environment",
-  "Community",
-  "Emergency",
+	"All",
+	"Education",
+	"Health",
+	"Business",
+	"Creative",
+	"Environment",
+	"Community",
+	"Emergency",
 ];
 
 export default function CampaignsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("featured");
-  const [allCampaigns, setAllCampaigns] = useState([]);
+	const [searchTerm, setSearchTerm] = useState("");
+	const [selectedCategory, setSelectedCategory] = useState("All");
+	const [sortBy, setSortBy] = useState("featured");
+	const [allCampaigns, setAllCampaigns] = useState([]);
 
-  useEffect(() => {
-    // const localCampaigns = JSON.parse(
-    //   localStorage.getItem("campaigns") || "[]",
-    // );
+	useEffect(() => {
+		// const localCampaigns = JSON.parse(
+		//   localStorage.getItem("campaigns") || "[]",
+		// );
 
-    async function fetchAndSetCampaign() {
-      try {
-        const response = await axiosPrivate.get("/campaigns/");
-        setAllCampaigns(response.data);
-        console.log(response.data);
-      } catch (err) {
-        console.error("Error fetching campaigns from backend:", err);
-        return [];
-      }
-    }
-    fetchAndSetCampaign();
-  }, []);
+		async function fetchAndSetCampaign() {
+			try {
+				const response = await axiosPrivate.get("/campaigns/");
+				setAllCampaigns(response.data);
+				console.log(response.data);
+			} catch (err) {
+				console.error("Error fetching campaigns from backend:", err);
+				return [];
+			}
+		}
+		fetchAndSetCampaign();
+	}, []);
 
-  // use this when backend is ready
-  // const { campaigns, loading, fetchCampaigns } = useCampaign();
+	// use this when backend is ready
+	// const { campaigns, loading, fetchCampaigns } = useCampaign();
 
-  // useEffect(() => {
-  // 	fetchCampaigns();
-  // 	// eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+	// useEffect(() => {
+	// 	fetchCampaigns();
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, []);
 
-  // const allCampaigns = campaigns || [];
+	// const allCampaigns = campaigns || [];
 
-  const filteredCampaigns = allCampaigns.filter((campaign) => {
-    const matchesSearch =
-      campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || campaign.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+	const filteredCampaigns = allCampaigns.filter((campaign) => {
+		const matchesSearch =
+			campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
+		const matchesCategory =
+			selectedCategory === "All" || campaign.category === selectedCategory;
+		return matchesSearch && matchesCategory;
+	});
 
-  const sortedCampaigns = [...filteredCampaigns].sort((a, b) => {
-    switch (sortBy) {
-      case "newest":
-        return b.id.localeCompare(a.id);
-      case "ending":
-        return a.daysLeft - b.daysLeft;
-      case "popular":
-        return b.backers - a.backers;
-      case "funded":
-        return b.raised / b.goal - a.raised / a.goal;
-      default:
-        return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-    }
-  });
+	const sortedCampaigns = [...filteredCampaigns].sort((a, b) => {
+		switch (sortBy) {
+			case "newest":
+				return b.id.localeCompare(a.id);
+			case "ending":
+				return a.daysLeft - b.daysLeft;
+			case "popular":
+				return b.backers - a.backers;
+			case "funded":
+				return b.raised / b.goal - a.raised / a.goal;
+			default:
+				return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+		}
+	});
 
-  const featuredCampaigns = allCampaigns.filter((c) => c.featured);
-  const urgentCampaigns = allCampaigns.filter((c) => c.urgent);
+	const featuredCampaigns = allCampaigns.filter((c) => c.featured);
+	const urgentCampaigns = allCampaigns.filter((c) => c.urgent);
 
-  return (
-    <div className="min-h-[calc(100vh-4rem)] bg-background flex items-center justify-center">
-      <div className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-4">Discover Campaigns</h1>
-          <p className="text-muted-foreground mb-6">
-            Find and support amazing projects that are making a difference
-          </p>
+	return (
+		<div className="min-h-[calc(100vh-4rem)] bg-background flex items-center justify-center">
+			<div className="container py-8">
+				<div className="mb-8">
+					<h1 className="text-3xl font-bold mb-4">Discover Campaigns</h1>
+					<p className="text-muted-foreground mb-6">
+						Find and support amazing projects that are making a difference
+					</p>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search campaigns..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="ending">Ending Soon</SelectItem>
-                <SelectItem value="popular">Most Popular</SelectItem>
-                <SelectItem value="funded">Most Funded</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+					{/* Search and Filters */}
+					<div className="flex flex-col md:flex-row gap-4 mb-6">
+						<div className="relative flex-1">
+							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+							<Input
+								placeholder="Search campaigns..."
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.target.value)}
+								className="pl-10"
+							/>
+						</div>
+						<Select
+							value={selectedCategory}
+							onValueChange={setSelectedCategory}
+						>
+							<SelectTrigger className="w-full md:w-48">
+								<SelectValue placeholder="Category" />
+							</SelectTrigger>
+							<SelectContent>
+								{categories.map((category) => (
+									<SelectItem key={category} value={category}>
+										{category}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<Select value={sortBy} onValueChange={setSortBy}>
+							<SelectTrigger className="w-full md:w-48">
+								<SelectValue placeholder="Sort by" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="featured">Featured</SelectItem>
+								<SelectItem value="newest">Newest</SelectItem>
+								<SelectItem value="ending">Ending Soon</SelectItem>
+								<SelectItem value="popular">Most Popular</SelectItem>
+								<SelectItem value="funded">Most Funded</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+				</div>
 
-        <Tabs defaultValue="all" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="all">All Campaigns</TabsTrigger>
-            <TabsTrigger value="featured">Featured</TabsTrigger>
-            <TabsTrigger value="urgent">Urgent</TabsTrigger>
-          </TabsList>
+				<Tabs defaultValue="all" className="space-y-6">
+					<TabsList>
+						<TabsTrigger value="all">All Campaigns</TabsTrigger>
+						<TabsTrigger value="featured">Featured</TabsTrigger>
+						<TabsTrigger value="urgent">Urgent</TabsTrigger>
+					</TabsList>
 
-          <TabsContent value="all">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedCampaigns.map((campaign) => (
-                <CampaignCard key={campaign.id} campaign={campaign} />
-              ))}
-            </div>
-          </TabsContent>
+					<TabsContent value="all">
+						<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+							{sortedCampaigns.map((campaign) => (
+								<CampaignCard key={campaign.id} campaign={campaign} />
+							))}
+						</div>
+					</TabsContent>
 
-          <TabsContent value="featured">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredCampaigns.map((campaign) => (
-                <CampaignCard key={campaign.id} campaign={campaign} />
-              ))}
-            </div>
-          </TabsContent>
+					<TabsContent value="featured">
+						<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+							{featuredCampaigns.map((campaign) => (
+								<CampaignCard key={campaign.id} campaign={campaign} />
+							))}
+						</div>
+					</TabsContent>
 
-          <TabsContent value="urgent">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {urgentCampaigns.map((campaign) => (
-                <CampaignCard key={campaign.id} campaign={campaign} />
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+					<TabsContent value="urgent">
+						<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+							{urgentCampaigns.map((campaign) => (
+								<CampaignCard key={campaign.id} campaign={campaign} />
+							))}
+						</div>
+					</TabsContent>
+				</Tabs>
 
-        {sortedCampaigns.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              No campaigns found matching your criteria.
-            </p>
-            <Button asChild className="mt-4">
-              <Link href="/campaigns/create">Start Your Own Campaign</Link>
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+				{sortedCampaigns.length === 0 && (
+					<div className="text-center py-12">
+						<p className="text-muted-foreground">
+							No campaigns found matching your criteria.
+						</p>
+						<Button asChild className="mt-4">
+							<Link href="/campaigns/create">Start Your Own Campaign</Link>
+						</Button>
+					</div>
+				)}
+			</div>
+		</div>
+	);
 }
 
 function CampaignCard({ campaign }: { campaign: any }) {
-  const progressPercentage = (campaign.raised / campaign.goal) * 100;
+	const progressPercentage = (campaign.raised / campaign.goal) * 100;
 
-  return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="relative">
-        <Image
-          src={campaign.image_urls.split(",")[0] || "/placeholder.svg"}
-          alt={campaign.title}
-          width={400}
-          height={200}
-          className="w-full h-48 object-cover"
-        />
-        <div className="absolute top-3 left-3 flex gap-2">
-          <Badge>{campaign.category}</Badge>
-          {campaign.featured && <Badge variant="secondary">Featured</Badge>}
-          {campaign.urgent && <Badge variant="destructive">Urgent</Badge>}
-        </div>
-        {campaign.daysLeft <= 7 && (
-          <Badge className="absolute top-3 right-3" variant="outline">
-            {campaign.daysLeft} days left
-          </Badge>
-        )}
-      </div>
+	return (
+		<Card className="overflow-hidden hover:shadow-lg transition-shadow">
+			<div className="relative">
+				<Image
+					src={campaign.image_urls.split(",")[0] || "/placeholder.svg"}
+					alt={campaign.title}
+					width={400}
+					height={200}
+					className="w-full h-48 object-cover"
+				/>
+				<div className="absolute top-3 left-3 flex gap-2">
+					<Badge>{campaign.category}</Badge>
+					{campaign.featured && <Badge variant="secondary">Featured</Badge>}
+					{campaign.urgent && <Badge variant="destructive">Urgent</Badge>}
+				</div>
+				{campaign.daysLeft <= 7 && (
+					<Badge className="absolute top-3 right-3" variant="outline">
+						{campaign.daysLeft} days left
+					</Badge>
+				)}
+			</div>
 
-      <CardHeader className="pb-3">
-        <h3 className="font-semibold text-lg line-clamp-2">{campaign.title}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {campaign.description}
-        </p>
-      </CardHeader>
+			<CardHeader className="pb-3">
+				<h3 className="font-semibold text-lg line-clamp-2">{campaign.title}</h3>
+				<p className="text-sm text-muted-foreground line-clamp-2">
+					{campaign.description}
+				</p>
+			</CardHeader>
 
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="font-medium">
-              ${campaign.raised.toLocaleString()} raised
-            </span>
-            <span className="text-muted-foreground">
-              {progressPercentage.toFixed(0)}%
-            </span>
-          </div>
-          <Progress value={progressPercentage} />
-          <div className="text-sm text-muted-foreground">
-            ${campaign.goal.toLocaleString()} goal
-          </div>
-        </div>
+			<CardContent className="space-y-4">
+				<div className="space-y-2">
+					<div className="flex justify-between text-sm">
+						<span className="font-medium">
+							${campaign.raised.toLocaleString()} raised
+						</span>
+						<span className="text-muted-foreground">
+							{progressPercentage.toFixed(0)}%
+						</span>
+					</div>
+					<Progress value={progressPercentage} />
+					<div className="text-sm text-muted-foreground">
+						${campaign.goal.toLocaleString()} goal
+					</div>
+				</div>
 
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            <span>{campaign.backers} backers</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Calendar className="h-4 w-4" />
-            <span>{campaign.daysLeft} days left</span>
-          </div>
-        </div>
+				<div className="flex items-center justify-between text-sm text-muted-foreground">
+					<div className="flex items-center gap-1">
+						<Users className="h-4 w-4" />
+						<span>{campaign.backers} backers</span>
+					</div>
+					<div className="flex items-center gap-1">
+						<Calendar className="h-4 w-4" />
+						<span>{campaign.daysLeft} days left</span>
+					</div>
+				</div>
 
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <MapPin className="h-4 w-4" />
-          <span>{campaign.location}</span>
-        </div>
-      </CardContent>
+				<div className="flex items-center gap-1 text-sm text-muted-foreground">
+					<MapPin className="h-4 w-4" />
+					<span>{campaign.location}</span>
+				</div>
+			</CardContent>
 
-      <CardFooter className="flex gap-2">
-        <Button asChild className="flex-1">
-          <Link href={`/campaigns/${campaign.id}`}>View Details</Link>
-        </Button>
-        <Button variant="outline" size="icon">
-          <Heart className="h-4 w-4" />
-        </Button>
-      </CardFooter>
-    </Card>
-  );
+			<CardFooter className="flex gap-2">
+				<Button asChild className="flex-1">
+					<Link href={`/campaigns/${campaign.id}`}>View Details</Link>
+				</Button>
+				<Button variant="outline" size="icon">
+					<Heart className="h-4 w-4" />
+				</Button>
+			</CardFooter>
+		</Card>
+	);
 }

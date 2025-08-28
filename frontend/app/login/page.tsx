@@ -33,6 +33,18 @@ export default function LoginPage() {
 		e.preventDefault();
 		setError("");
 
+		// Admin credentials check [hardcoded for demonstration purposes]
+		if (email === "admin@baksho.com" && password === "admin123") {
+			toast({
+				title: "Admin login successful!",
+				description: "You have successfully logged in.",
+			});
+			// Redirect to admin dashboard
+			window.location.href = "/admin";
+			router.push("/admin");
+			return;
+		}
+
 		try {
 			await login(email, password);
 			toast({

@@ -268,13 +268,7 @@ export default function AdminCampaignsPage() {
 			{/* Header */}
 			<header className="bg-white border-b">
 				<div className="container mx-auto px-4 py-4">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center space-x-2">
-							<Shield className="h-6 w-6 text-red-500" />
-							<Link href="/admin" className="text-xl font-bold text-green-700">
-								FundBD Admin
-							</Link>
-						</div>
+					<div className="flex items-center justify-center">
 						<nav className="flex items-center space-x-6">
 							<Link
 								href="/admin"
