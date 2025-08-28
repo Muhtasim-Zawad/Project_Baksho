@@ -24,7 +24,6 @@ class CampaignCreate(SQLModel):
     image_urls: str # Comma-separated list of URLs
     incentive_tiers: List[IncentiveTierCreate] = []
 
-# --- NEW SCHEMA FOR UPDATES ---
 class CampaignUpdate(SQLModel):
     title: Optional[str] = None
     description: Optional[str] = None

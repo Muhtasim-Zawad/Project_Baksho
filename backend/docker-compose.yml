@@ -103,9 +103,22 @@ services:
     volumes:
       - minio_data:/data
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: 12345678
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=12345678
+      - MINIO_BROWSER_CORS_ALLOW_ORIGIN=http://localhost:3000
     command: server /data --console-address ":9001"
+    networks:
+      - baksho-net
+
+  sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: sqlite-web
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./campaign-service/db_data:/data # same volume as your SQLite db
+    environment:
+      - SQLITE_DATABASE=/data/campaigns.db
     networks:
       - baksho-net
 
