@@ -40,7 +40,6 @@ export default function LoginPage() {
 				description: "You have successfully logged in.",
 			});
 			// Redirect to admin dashboard
-			window.location.href = "/admin";
 			router.push("/admin");
 			return;
 		}
