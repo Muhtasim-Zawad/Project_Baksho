@@ -89,4 +89,21 @@ public class GatewayConfig {
             )
             .build(); // No filter applied
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> publicNotificationRoutes() {
+        return GatewayRouterFunctions.route("public-notification-service")
+                .route(
+                        RequestPredicates.path("/notifications/**")
+                                .and(RequestPredicates.method(org.springframework.http.HttpMethod.GET)
+                                        .or(RequestPredicates.method(org.springframework.http.HttpMethod.POST))
+                                        .or(RequestPredicates.method(org.springframework.http.HttpMethod.PUT))
+                                        .or(RequestPredicates.method(org.springframework.http.HttpMethod.DELETE))),
+                        HandlerFunctions.http(
+                                URI.create("http://notification-service:8002")
+                        )
+                )
+                .build(); // No filter applied
+    }
+
 }
