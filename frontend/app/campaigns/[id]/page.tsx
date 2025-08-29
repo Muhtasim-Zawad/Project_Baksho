@@ -25,12 +25,10 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import PaymentForm from "@/components/payment/PaymentForm";
-import { CheckoutProvider } from '@stripe/react-stripe-js';
-import CheckoutForm from "@/components/payment/CheckoutForm";
-import { loadStripe } from "@stripe/stripe-js";
+import { set } from "date-fns";
 
 // Types
-interface IncentiveTier {
+export interface IncentiveTier {
   id: number;
   amount: number;
   title: string;
@@ -39,7 +37,7 @@ interface IncentiveTier {
   incentive?: string;
 }
 
-interface Campaign {
+export interface Campaign {
   id: number;
   title: string;
   description: string;
@@ -68,16 +66,20 @@ interface CampaignDetailsPageProps {
   };
 }
 
+export interface Transaction {
+  id: number;
+  user_id: string;
+  campaign_id: number;
+  amount: string;
+  currency: string;
+  payment_status: string;
+  payment_intent_id: string;
+  created_at: string;
+}
+
+
 // API functions
 const API_BASE_URL = "http://localhost:8080";
-
-const stripePromise = loadStripe("pk_test_51PNCu5RuW4NDldMhZA9iCCskYyLpxjahc0XZJqP9KYceFSZzZHLXnMNzAYNBHCRMXiELPxBQLOEzMhTOfidNPHRK00V5cFwecY");
-
-const fetchClientSecret = () => {
-  return fetch('/create-checkout-session', { method: 'POST' })
-    .then((response) => response.json())
-    .then((json) => json.checkoutSessionClientSecret)
-};
 
 
 const getAuthToken = (): string | null => {
@@ -133,10 +135,29 @@ export default function CampaignDetailsPage({
   const [error, setError] = useState<string | null>(null);
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [newComment, setNewComment] = useState("");
-
-
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [totalRaised, setTotalRaised] = useState(0);
   const router = useRouter();
   const campaignId = params.id;
+
+  useEffect(() => {
+    const loadTransactions = async () => {
+      try {
+        const response = await fetchWithAuth(`http://localhost:1234/payments/campaign/${campaignId}`);
+        setTransactions(Array.isArray(response) ? response : []);
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+      }
+    };
+
+    loadTransactions();
+  }, [campaignId]);
+
+
+
+  if(transactions.length > 0 && totalRaised === 0) {
+    setTotalRaised(transactions.reduce((acc, tx) => acc + Number(tx.amount), 0));
+  }
 
   useEffect(() => {
     const loadCampaign = async () => {
@@ -222,7 +243,7 @@ export default function CampaignDetailsPage({
     );
   }
 
-  const progressPercentage = (campaign.raised / campaign.goal) * 100;
+  const progressPercentage = (totalRaised / campaign.goal) * 100;
   const daysLeft = calculateDaysLeft(
     campaign.created_at || "",
     campaign.duration,
@@ -469,7 +490,7 @@ export default function CampaignDetailsPage({
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-2xl font-bold">
-                        ৳{campaign.raised.toLocaleString()}
+                        ৳{totalRaised.toLocaleString()}
                       </span>
                       <span className="text-sm text-gray-600">raised</span>
                     </div>
@@ -483,7 +504,7 @@ export default function CampaignDetailsPage({
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                     <div className="text-center">
                       <div className="text-xl font-bold">
-                        {campaign.backers}
+                        {transactions?.length}
                       </div>
                       <div className="text-sm text-gray-600">backers</div>
                     </div>
@@ -543,6 +564,7 @@ export default function CampaignDetailsPage({
                         <PaymentForm 
                           price={campaign.incentive_tiers[selectedTier].amount} 
                           campaignId={campaign.id}
+                          setTotalRaised={setTotalRaised}
                         />
                       }
 

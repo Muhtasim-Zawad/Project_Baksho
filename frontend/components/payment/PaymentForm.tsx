@@ -7,13 +7,12 @@ import { useAuth } from '@/contexts/auth-context';
 
 const stripePromise = loadStripe('pk_test_51PNCu5RuW4NDldMhZA9iCCskYyLpxjahc0XZJqP9KYceFSZzZHLXnMNzAYNBHCRMXiELPxBQLOEzMhTOfidNPHRK00V5cFwecY'); // your Stripe publishable key
 
-const CheckoutForm: React.FC<{ price: number; campaignId: number }> = ({ price, campaignId }) => {
+const CheckoutForm: React.FC<{ price: number; campaignId: number; setTotalRaised: React.Dispatch<React.SetStateAction<number>> }> = ({ price, campaignId, setTotalRaised }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [amount, setAmount] = useState(price);
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
-
     const { user } = useAuth();
 
     useEffect(() => {
@@ -52,12 +51,12 @@ const CheckoutForm: React.FC<{ price: number; campaignId: number }> = ({ price, 
 
                 // 3. Save payment info in backend
                 await axios.post("http://localhost:1234/payments", paymentRecord);
-
+                setTotalRaised((prev) => prev + paymentRecord.amount);
                 setMessage('✅ Payment succeeded and recorded!');
             }
         } catch (err: any) {
             setMessage(`Error: ${err.message}`);
-        }finally {
+        } finally {
             setLoading(false);
         }
     };
@@ -81,10 +80,10 @@ const CheckoutForm: React.FC<{ price: number; campaignId: number }> = ({ price, 
     );
 };
 
-const PaymentForm: React.FC<{ price: number; campaignId: number }> = ({ price, campaignId }) => (
+const PaymentForm: React.FC<{ price: number; campaignId: number; setTotalRaised: React.Dispatch<React.SetStateAction<number>> }> = ({ price, campaignId, setTotalRaised }) => (
     <Elements stripe={stripePromise}>
         <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-            <CheckoutForm price={price} campaignId={campaignId} />
+            <CheckoutForm price={price} campaignId={campaignId} setTotalRaised={setTotalRaised} />
         </div>
     </Elements>
 );
