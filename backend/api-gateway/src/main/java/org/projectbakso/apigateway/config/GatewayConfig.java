@@ -94,12 +94,16 @@ public class GatewayConfig {
     public RouterFunction<ServerResponse> publicNotificationRoutes() {
         return GatewayRouterFunctions.route("public-notification-service")
                 .route(
-                        // Matches ALL GET requests under /campaigns/, including /campaigns and /campaigns/{id}
-                        RequestPredicates.GET("/notifications/**"),
+                        RequestPredicates.path("/notifications/**")
+                                .and(RequestPredicates.method(org.springframework.http.HttpMethod.GET)
+                                        .or(RequestPredicates.method(org.springframework.http.HttpMethod.POST))
+                                        .or(RequestPredicates.method(org.springframework.http.HttpMethod.PUT))
+                                        .or(RequestPredicates.method(org.springframework.http.HttpMethod.DELETE))),
                         HandlerFunctions.http(
-                                URI.create("http://notification-service:8000")
+                                URI.create("http://notification-service:8002")
                         )
                 )
                 .build(); // No filter applied
     }
+
 }

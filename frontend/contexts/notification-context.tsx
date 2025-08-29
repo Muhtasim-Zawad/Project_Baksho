@@ -3,17 +3,18 @@
 "use client";
 
 import { axiosPrivate } from "@/hooks/useAxiosPrivate";
+import { axiosPublic } from "@/hooks/useAxiosPublic";
 import type React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
 
-// Interface for raw data from the backend
+// Interface for raw data from the backend (matches NotificationRead schema)
 interface BackendNotification {
   id: number;
   user_id: string;
   notification: string;
   url: string;
   seen: boolean;
-  created_at: string; // ISO date string from backend
+  created_at: string; // ISO date-time string from backend
 }
 
 // Frontend notification interface with a proper Date object
@@ -26,15 +27,25 @@ export interface Notification {
   created_at: Date; // Use the Date object for easier handling
 }
 
+// Interface for creating notifications (matches NotificationCreate schema)
+export interface NotificationCreateData {
+  user_id: string;
+  notification: string;
+  url: string;
+}
+
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
   loading: boolean;
   error: string | null;
   fetchNotifications: () => Promise<void>;
+  createNotification: (data: NotificationCreateData) => Promise<void>;
   markAsRead: (id: number) => Promise<void>;
   markAllAsRead: () => Promise<void>;
-  clearAll: () => void;
+  deleteNotification: (id: number) => Promise<void>;
+  clearAll: () => Promise<void>;
+  clearError: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -50,9 +61,8 @@ export function NotificationProvider({
   const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState<string | null>(null);
 
-  // Placeholder for getting the current user ID
+  // Get the current user ID
   const getCurrentUserId = async (): Promise<string | null> => {
-    // Replace with your actual authentication logic (e.g., from a context or token)
     try {
       const res = await axiosPrivate.get("/api/users/get-profile");
       return res.data?._id || null;
@@ -62,6 +72,12 @@ export function NotificationProvider({
     }
   };
 
+  // Clear error state
+  const clearError = () => {
+    setError(null);
+  };
+
+  // Fetch notifications for the current user
   const fetchNotifications = async () => {
     setLoading(true);
     setError(null);
@@ -73,6 +89,7 @@ export function NotificationProvider({
         return;
       }
 
+      // GET /notifications/{user_id}
       const response = await axiosPrivate.get(`/notifications/${userId}`);
 
       // The raw data from the backend
@@ -82,7 +99,7 @@ export function NotificationProvider({
       const transformedNotifications: Notification[] = backendNotifications.map(
         (notif) => ({
           ...notif,
-          created_at: new Date(notif.created_at), // <-- KEY CHANGE HERE
+          created_at: new Date(notif.created_at),
         }),
       );
 
@@ -102,7 +119,34 @@ export function NotificationProvider({
     }
   };
 
+  // Create a new notification
+  const createNotification = async (data: NotificationCreateData) => {
+    try {
+      setError(null);
+
+      // POST /notifications/
+      const response = await axiosPrivate.post("/notifications/", data);
+
+      // Transform the response to include Date object
+      const newNotification: Notification = {
+        ...response.data,
+        created_at: new Date(response.data.created_at),
+      };
+
+      // Add the new notification to the beginning of the list
+      setNotifications((prev) => [newNotification, ...prev]);
+    } catch (err) {
+      console.error("Error creating notification:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to create notification",
+      );
+      throw err; // Re-throw so caller can handle if needed
+    }
+  };
+
+  // Mark a single notification as read
   const markAsRead = async (id: number) => {
+    console.log("Marking as read:", id);
     try {
       // Optimistic update: update UI immediately
       setNotifications((prev) =>
@@ -113,31 +157,34 @@ export function NotificationProvider({
         ),
       );
 
-      // Make the API call
+      // PUT /notifications/{notification_id}
       await axiosPrivate.put(`/notifications/${id}`, { seen: true });
     } catch (err) {
       console.error("Error marking notification as read:", err);
       setError("Failed to mark notification as read");
-      // Revert the change on error if needed
+      // Revert the change on error
       fetchNotifications();
     }
   };
 
+  // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
-      const unreadIds = notifications.filter((n) => !n.seen).map((n) => n.id);
+      const unreadNotifications = notifications.filter((n) => !n.seen);
 
-      if (unreadIds.length === 0) return;
+      if (unreadNotifications.length === 0) return;
 
       // Optimistic update
       setNotifications((prev) =>
         prev.map((notification) => ({ ...notification, seen: true })),
       );
 
-      // API call to mark all as read (assuming your backend supports this)
-      await axiosPrivate.put(`/notifications/mark-all-as-read`, {
-        ids: unreadIds,
-      });
+      // Update each notification individually since the API doesn't have a bulk endpoint
+      const updatePromises = unreadNotifications.map((notification) =>
+        axiosPrivate.put(`/notifications/${notification.id}`, { seen: true }),
+      );
+
+      await Promise.all(updatePromises);
     } catch (err) {
       console.error("Error marking all notifications as read:", err);
       setError("Failed to mark all notifications as read");
@@ -146,11 +193,47 @@ export function NotificationProvider({
     }
   };
 
-  const clearAll = () => {
-    // Here you might also want to make an API call to delete notifications
-    setNotifications([]);
+  // Delete a single notification
+  const deleteNotification = async (id: number) => {
+    try {
+      // Optimistic update: remove from UI immediately
+      setNotifications((prev) =>
+        prev.filter((notification) => notification.id !== id),
+      );
+
+      // DELETE /notifications/{notification_id}
+      await axiosPrivate.delete(`/notifications/${id}`);
+    } catch (err) {
+      console.error("Error deleting notification:", err);
+      setError("Failed to delete notification");
+      // Revert the change on error
+      fetchNotifications();
+    }
   };
 
+  // Clear all notifications (delete all for current user)
+  const clearAll = async () => {
+    try {
+      const currentNotifications = [...notifications];
+
+      // Optimistic update: clear UI immediately
+      setNotifications([]);
+
+      // Delete each notification individually
+      const deletePromises = currentNotifications.map((notification) =>
+        axiosPrivate.delete(`/notifications/${notification.id}`),
+      );
+
+      await Promise.all(deletePromises);
+    } catch (err) {
+      console.error("Error clearing all notifications:", err);
+      setError("Failed to clear all notifications");
+      // Revert on error
+      fetchNotifications();
+    }
+  };
+
+  // Fetch notifications on component mount and set up polling
   useEffect(() => {
     fetchNotifications(); // Initial fetch
 
@@ -159,6 +242,7 @@ export function NotificationProvider({
     return () => clearInterval(interval);
   }, []);
 
+  // Calculate unread count
   const unreadCount = notifications.filter((n) => !n.seen).length;
 
   return (
@@ -169,9 +253,12 @@ export function NotificationProvider({
         loading,
         error,
         fetchNotifications,
+        createNotification,
         markAsRead,
         markAllAsRead,
+        deleteNotification,
         clearAll,
+        clearError,
       }}
     >
       {children}

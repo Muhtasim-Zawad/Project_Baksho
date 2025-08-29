@@ -61,6 +61,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read (seen) if not already
     if (!notification.seen) {
+      // console.log(notification.id);
       await markAsRead(notification.id);
     }
 
