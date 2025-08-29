@@ -237,13 +237,12 @@ export function NotificationProvider({
   useEffect(() => {
     fetchNotifications(); // Initial fetch
 
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+    const interval = setInterval(fetchNotifications, 5000); // Poll every 30 seconds
 
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate unread count
-  const unreadCount = notifications.filter((n) => !n.seen).length;
+  const unreadCount = notifications.filter((n) => n.seen === false).length;
 
   return (
     <NotificationContext.Provider

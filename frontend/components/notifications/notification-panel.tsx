@@ -1,3 +1,5 @@
+// src/components/NotificationPanel.tsx
+
 "use client";
 
 import {
@@ -8,7 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, X, CheckCheck, ExternalLink, RefreshCw } from "lucide-react";
+import {
+  Bell,
+  X,
+  CheckCheck,
+  ExternalLink,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 
@@ -53,10 +62,13 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
     error,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
     fetchNotifications,
   } = useNotifications();
 
   const router = useRouter();
+
+  console.log(unreadCount);
 
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read (seen) if not already
@@ -85,6 +97,11 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
 
   const handleRefresh = async () => {
     await fetchNotifications();
+  };
+
+  const handleDelete = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation(); // Prevent the notification click handler from firing
+    await deleteNotification(id);
   };
 
   return (
@@ -154,7 +171,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-3 border-b hover:bg-muted/50 cursor-pointer transition-colors ${
+                  className={`group p-3 border-b hover:bg-muted/50 cursor-pointer transition-colors ${
                     !notification.seen
                       ? "bg-muted/30 border-l-2 border-l-primary"
                       : ""
@@ -181,6 +198,15 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                           {!notification.seen && (
                             <div className="h-2 w-2 rounded-full bg-primary" />
                           )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => handleDelete(e, notification.id)}
+                            title="Delete notification"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">
