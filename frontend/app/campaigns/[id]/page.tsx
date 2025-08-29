@@ -25,6 +25,9 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import PaymentForm from "@/components/payment/PaymentForm";
+import { CheckoutProvider } from '@stripe/react-stripe-js';
+import CheckoutForm from "@/components/payment/CheckoutForm";
+import { loadStripe } from "@stripe/stripe-js";
 
 // Types
 interface IncentiveTier {
@@ -67,6 +70,15 @@ interface CampaignDetailsPageProps {
 
 // API functions
 const API_BASE_URL = "http://localhost:8080";
+
+const stripePromise = loadStripe("pk_test_51PNCu5RuW4NDldMhZA9iCCskYyLpxjahc0XZJqP9KYceFSZzZHLXnMNzAYNBHCRMXiELPxBQLOEzMhTOfidNPHRK00V5cFwecY");
+
+const fetchClientSecret = () => {
+  return fetch('/create-checkout-session', { method: 'POST' })
+    .then((response) => response.json())
+    .then((json) => json.checkoutSessionClientSecret)
+};
+
 
 const getAuthToken = (): string | null => {
   if (typeof window !== "undefined") {
@@ -121,6 +133,7 @@ export default function CampaignDetailsPage({
   const [error, setError] = useState<string | null>(null);
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [newComment, setNewComment] = useState("");
+
 
   const router = useRouter();
   const campaignId = params.id;
@@ -497,11 +510,10 @@ export default function CampaignDetailsPage({
                     {campaign.incentive_tiers.map((tier, index) => (
                       <div
                         key={tier.id}
-                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                          selectedTier === index
-                            ? "border-green-500 bg-green-50"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${selectedTier === index
+                          ? "border-green-500 bg-green-50"
+                          : "border-gray-200 hover:border-gray-300"
+                          }`}
                         onClick={() =>
                           setSelectedTier(selectedTier === index ? null : index)
                         }
@@ -524,16 +536,15 @@ export default function CampaignDetailsPage({
                     ))}
 
                     <div className="pt-4 space-y-3">
-                      <Button
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        size="lg"
-                      >
-                        Donate Now
-                      </Button>
 
-                      {/* -----------Payment Form------------------ */}
-                      <PaymentForm />
-                      {/* -----------Payment Form------------------ */}
+
+                      {
+                        selectedTier == null ? " ": 
+                        <PaymentForm 
+                          price={campaign.incentive_tiers[selectedTier].amount} 
+                          campaignId={campaign.id}
+                        />
+                      }
 
                       <Button
                         variant="outline"

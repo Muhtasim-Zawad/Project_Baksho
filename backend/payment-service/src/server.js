@@ -1,7 +1,8 @@
 import express from 'express'
 import mysql from 'mysql2'
 import dotenv from 'dotenv'
-import stripe from 'stripe'
+import Stripe from 'stripe'
+import cors from 'cors'
 
 dotenv.config();
 
@@ -13,7 +14,13 @@ const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_NAME = process.env.DB_NAME;
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2022-11-15'
+});
 
+app.use(cors({
+    origin: '*',
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -35,7 +42,7 @@ db.connect((err) => {
     const createPaymentsTable = `
         CREATE TABLE IF NOT EXISTS payments (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id INT NOT NULL,
+            user_id VARCHAR(255) NOT NULL,
             campaign_id INT NOT NULL,
             amount DECIMAL(10,2) NOT NULL,
             currency VARCHAR(10) NOT NULL,
@@ -58,7 +65,7 @@ app.post("/create-payment-intent", async (req, res) => {
     const { price } = req.body;
     const amount = parseInt(price * 100);
 
-    const paymentIntent = await stripe(process.env.STRIPE_SECRET_KEY).paymentIntents.create({
+    const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
         payment_method_types: ["card"], //important ----
@@ -72,6 +79,7 @@ app.post("/create-payment-intent", async (req, res) => {
 app.post("/payments", async (req, res) => {
     const paymentInfo = req.body;
     const { campaignId, userId, amount, currency, paymentIntentId, status } = paymentInfo;
+    console.log(paymentInfo);
 
     if (!campaignId || !userId || !amount || !currency || !status) {
         return res.status(400).json({ error: "Missing required fields" });
@@ -104,6 +112,43 @@ app.post("/payments", async (req, res) => {
 
 });
 
+// Get all payments
+app.get("/payments", (req, res) => {
+    const query = "SELECT * FROM payments ORDER BY created_at DESC";
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error("Error fetching payments:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(results);
+    });
+});
+
+// Get payments by userId
+app.get("/payments/user/:userId", (req, res) => {
+    const { userId } = req.params;
+    const query = "SELECT * FROM payments WHERE user_id = ? ORDER BY created_at DESC";
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error("Error fetching user payments:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(results);
+    });
+});
+
+// Get payments by campaignId
+app.get("/payments/campaign/:campaignId", (req, res) => {
+    const { campaignId } = req.params;
+    const query = "SELECT * FROM payments WHERE campaign_id = ? ORDER BY created_at DESC";
+    db.query(query, [campaignId], (err, results) => {
+        if (err) {
+            console.error("Error fetching campaign payments:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(results);
+    });
+});
 
 
 app.get('/', (req, res) => {

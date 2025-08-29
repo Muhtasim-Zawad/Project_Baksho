@@ -1,101 +1,92 @@
-import { useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Button } from "@/components/ui/button";
+import axios from 'axios';
+import { useAuth } from '@/contexts/auth-context';
 
-const PaymentForm = () => {
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [name, setName] = useState("");
+const stripePromise = loadStripe('pk_test_51PNCu5RuW4NDldMhZA9iCCskYyLpxjahc0XZJqP9KYceFSZzZHLXnMNzAYNBHCRMXiELPxBQLOEzMhTOfidNPHRK00V5cFwecY'); // your Stripe publishable key
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const CheckoutForm: React.FC<{ price: number; campaignId: number }> = ({ price, campaignId }) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [amount, setAmount] = useState(price);
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    // simple validation
-    if (!cardNumber || !expiry || !cvv || !name) {
-      alert("Please fill in all fields.");
-      return;
-    }
+    const { user } = useAuth();
 
-    alert("Payment submitted (demo only)");
-  };
+    useEffect(() => {
+        setAmount(price);
+    }, [price]);
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-2xl shadow-lg w-96"
-      >
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          Card Payment
-        </h2>
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!stripe || !elements || !user) return;
 
-        {/* Name */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Name on Card
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="John Doe"
-          />
-        </div>
+        try {
+            setLoading(true);
+            // 1. Create PaymentIntent on backend
+            const res = await axios.post("http://localhost:1234/create-payment-intent", { price: amount });
+            const data = res.data;
 
-        {/* Card Number */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Card Number
-          </label>
-          <input
-            type="text"
-            value={cardNumber}
-            onChange={(e) => setCardNumber(e.target.value)}
-            maxLength={16}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="1234 5678 9012 3456"
-          />
-        </div>
+            // 2. Confirm Card Payment
+            const card = elements.getElement(CardElement);
+            if (!card) return;
 
-        {/* Expiry + CVV */}
-        <div className="flex gap-4 mb-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Expiry
-            </label>
-            <input
-              type="text"
-              value={expiry}
-              onChange={(e) => setExpiry(e.target.value)}
-              maxLength={5}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="MM/YY"
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              CVV
-            </label>
-            <input
-              type="password"
-              value={cvv}
-              onChange={(e) => setCvv(e.target.value)}
-              maxLength={4}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="123"
-            />
-          </div>
-        </div>
+            const paymentResult = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: { card }
+            });
 
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
-        >
-          Pay Now
-        </button>
-      </form>
-    </div>
-  );
+            if (paymentResult.error) {
+                setMessage(`Payment failed: ${paymentResult.error.message}`);
+            } else if (paymentResult.paymentIntent?.status === 'succeeded') {
+                const paymentRecord = {
+                    userId: user._id,
+                    campaignId: campaignId,
+                    amount: paymentResult.paymentIntent.amount / 100,
+                    currency: paymentResult.paymentIntent.currency,
+                    paymentIntentId: paymentResult.paymentIntent.id,
+                    status: paymentResult.paymentIntent.status,
+                };
+
+                // 3. Save payment info in backend
+                await axios.post("http://localhost:1234/payments", paymentRecord);
+
+                setMessage('✅ Payment succeeded and recorded!');
+            }
+        } catch (err: any) {
+            setMessage(`Error: ${err.message}`);
+        }finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
+            <h2 className="text-lg font-semibold">Pay ৳{amount}</h2>
+            <div className="p-3 border rounded-md bg-white shadow-sm">
+                <CardElement />
+            </div>
+            <Button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                size="lg"
+                disabled={!stripe || loading}
+            >
+                {loading ? "Processing..." : "Donate Now"}
+            </Button>
+            {message && <p className="text-center mt-4">{message}</p>}
+        </form>
+    );
 };
+
+const PaymentForm: React.FC<{ price: number; campaignId: number }> = ({ price, campaignId }) => (
+    <Elements stripe={stripePromise}>
+        <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+            <CheckoutForm price={price} campaignId={campaignId} />
+        </div>
+    </Elements>
+);
 
 export default PaymentForm;
