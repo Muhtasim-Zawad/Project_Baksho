@@ -201,10 +201,6 @@ export default function CampaignsPage() {
 	const [allCampaigns, setAllCampaigns] = useState([]);
 
 	useEffect(() => {
-		// const localCampaigns = JSON.parse(
-		//   localStorage.getItem("campaigns") || "[]",
-		// );
-
 		async function fetchAndSetCampaign() {
 			try {
 				const response = await axiosPrivate.get("/campaigns/");

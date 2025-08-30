@@ -2,6 +2,29 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+	Shield,
+	Search,
+	Filter,
+	Eye,
+	CheckCircle,
+	XCircle,
+	AlertTriangle,
+	Calendar,
+	MapPin,
+	Target,
+	User,
+	FileText,
+	MessageSquare,
+} from "lucide-react";
+import {
 	Card,
 	CardContent,
 	CardDescription,
@@ -15,6 +38,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, DollarSign, TrendingUp, Gift } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { axiosPrivate } from "@/hooks/useAxiosPrivate";
 
 // Mock data
 const donationStats = {
@@ -101,6 +126,22 @@ const incentives = [
 export default function UserDashboard() {
 	const { user } = useAuth();
 
+	const [myCampaigns, setMyCampaigns] = useState([]);
+
+	useEffect(() => {
+		async function fetchAndSetCampaign() {
+			try {
+				const response = await axiosPrivate.get("/campaigns/");
+				setMyCampaigns(response.data);
+				console.log(response.data);
+			} catch (err) {
+				console.error("Error fetching campaigns from backend:", err);
+				return [];
+			}
+		}
+		fetchAndSetCampaign();
+	}, []);
+
 	if (!user) {
 		return <div>Please log in to access your dashboard.</div>;
 	}
@@ -139,14 +180,12 @@ export default function UserDashboard() {
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="text-sm font-medium">
-								Campaigns Supported
+								Campaigns Created
 							</CardTitle>
 							<Heart className="h-4 w-4 text-muted-foreground" />
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">
-								{donationStats.campaignsSupported}
-							</div>
+							<div className="text-2xl font-bold">{myCampaigns.length}</div>
 							<p className="text-xs text-muted-foreground">
 								Across 5 categories
 							</p>
@@ -186,116 +225,100 @@ export default function UserDashboard() {
 
 				<Tabs defaultValue="donations" className="space-y-6">
 					<TabsList>
-						<TabsTrigger value="donations">Recent Donations</TabsTrigger>
-						<TabsTrigger value="campaigns">Supported Campaigns</TabsTrigger>
+						<TabsTrigger value="donations">My Campaigns</TabsTrigger>
 						<TabsTrigger value="incentives">Incentives</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="donations">
 						<Card>
 							<CardHeader>
-								<CardTitle>Recent Donations</CardTitle>
-								<CardDescription>
-									Your latest contributions to campaigns
-								</CardDescription>
+								<CardTitle>My Campaigns</CardTitle>
+								<CardDescription>Your latest campaigns...</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<div className="space-y-4">
-									{recentDonations.map((donation) => (
-										<div
-											key={donation.id}
-											className="flex items-center justify-between p-4 border rounded-lg"
-										>
-											<div className="space-y-1">
-												<p className="font-medium">{donation.campaign}</p>
-												<div className="flex items-center gap-4 text-sm text-muted-foreground">
-													<span>${donation.amount}</span>
-													<span>
-														{new Date(donation.date).toLocaleDateString()}
-													</span>
-													<Badge
-														variant={
-															donation.status === "completed"
-																? "default"
-																: "secondary"
-														}
-													>
-														{donation.status}
-													</Badge>
+								<div className="space-y-6">
+									{myCampaigns.map((campaign) => (
+										<Card key={campaign.id} className="overflow-hidden">
+											<CardContent className="p-0">
+												<div className="grid lg:grid-cols-3 gap-6 p-6">
+													{/* Campaign Image */}
+													<div className="lg:col-span-1">
+														<Image
+															src={
+																campaign.image_urls.split(",")[0] ||
+																"/placeholder.svg"
+															}
+															alt={campaign.title}
+															width={300}
+															height={200}
+															className="w-full h-48 object-cover rounded-lg"
+														/>
+														<div className="flex flex-wrap gap-2 mt-3">
+															<Badge variant="secondary">
+																{campaign.category}
+															</Badge>
+														</div>
+													</div>
+
+													{/* Campaign Details */}
+													<div className="lg:col-span-1 space-y-4">
+														<div>
+															<h3 className="text-xl font-bold mb-2">
+																{campaign.title}
+															</h3>
+															<p className="text-gray-600 text-sm mb-3">
+																{campaign.description}
+															</p>
+														</div>
+
+														<div className="space-y-2 text-sm">
+															<div className="flex items-center text-gray-600">
+																<User className="h-4 w-4 mr-2" />
+																{campaign.organizer_name}
+															</div>
+															<div className="flex items-center text-gray-600">
+																<MapPin className="h-4 w-4 mr-2" />
+																{campaign.location}
+															</div>
+															<div className="flex items-center text-gray-600">
+																<Target className="h-4 w-4 mr-2" />
+																Goal: ৳{campaign.goal.toLocaleString()}
+															</div>
+															<div className="flex items-center text-gray-600">
+																<Calendar className="h-4 w-4 mr-2" />
+																{campaign.duration} days duration
+															</div>
+														</div>
+													</div>
+
+													{/* Actions */}
+													<div className="lg:col-span-1 space-y-4">
+														<div className="space-y-3">
+															<Dialog>
+																{/* <DialogTrigger asChild> */}
+																<Button
+																	variant="outline"
+																	className="w-full bg-transparent"
+																>
+																	<Eye className="h-4 w-4 mr-2" />
+																	<Link href={`/campaigns/${campaign.id}`}>
+																		View Details
+																	</Link>
+																</Button>
+															</Dialog>
+														</div>
+
+														<div className="text-xs text-gray-500 pt-4 border-t">
+															Submitted: {campaign.created_at}
+														</div>
+													</div>
 												</div>
-												{donation.incentive && (
-													<p className="text-sm text-muted-foreground">
-														Incentive: {donation.incentive}
-													</p>
-												)}
-											</div>
-											<Button variant="outline" size="sm">
-												View Receipt
-											</Button>
-										</div>
+											</CardContent>
+										</Card>
 									))}
 								</div>
 							</CardContent>
 						</Card>
-					</TabsContent>
-
-					<TabsContent value="campaigns">
-						<div className="grid gap-6">
-							{supportedCampaigns.map((campaign) => (
-								<Card key={campaign.id}>
-									<CardContent className="p-6">
-										<div className="flex gap-4">
-											<Image
-												src={campaign.image || "/placeholder.svg"}
-												alt={campaign.title}
-												width={150}
-												height={100}
-												className="rounded-lg object-cover"
-											/>
-											<div className="flex-1 space-y-3">
-												<div className="flex items-start justify-between">
-													<h3 className="font-semibold text-lg">
-														{campaign.title}
-													</h3>
-													<Badge
-														variant={
-															campaign.status === "completed"
-																? "default"
-																: "secondary"
-														}
-													>
-														{campaign.status}
-													</Badge>
-												</div>
-
-												<div className="space-y-2">
-													<div className="flex justify-between text-sm">
-														<span>
-															${campaign.raised.toLocaleString()} raised
-														</span>
-														<span>${campaign.goal.toLocaleString()} goal</span>
-													</div>
-													<Progress
-														value={(campaign.raised / campaign.goal) * 100}
-													/>
-												</div>
-
-												<div className="flex items-center justify-between">
-													<p className="text-sm text-muted-foreground">
-														Your contribution: ${campaign.myContribution}
-													</p>
-													<Button asChild variant="outline" size="sm">
-														<Link href={`/campaigns/${campaign.id}`}>
-															View Campaign
-														</Link>
-													</Button>
-												</div>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-							))}
-						</div>
 					</TabsContent>
 
 					<TabsContent value="incentives">
