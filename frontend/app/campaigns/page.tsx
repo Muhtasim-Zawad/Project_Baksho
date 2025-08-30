@@ -24,6 +24,7 @@ import { Search, Calendar, MapPin, Users, Heart } from "lucide-react";
 import { useCampaign } from "@/contexts/campaign-context";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 
 import { axiosPrivate } from "@/hooks/useAxiosPrivate";
 import { axiosPublic } from "@/hooks/useAxiosPublic";
@@ -179,6 +180,7 @@ import { axiosPublic } from "@/hooks/useAxiosPublic";
 const categories = [
 	"All",
 	"Education",
+	"Technology",
 	"Health",
 	"Business",
 	"Creative",
@@ -188,8 +190,13 @@ const categories = [
 ];
 
 export default function CampaignsPage() {
+	const searchParams = useSearchParams();
+	const initialCategory = searchParams.get("category");
 	const [searchTerm, setSearchTerm] = useState("");
-	const [selectedCategory, setSelectedCategory] = useState("All");
+	// const [selectedCategory, setSelectedCategory] = useState("All");
+	const [selectedCategory, setSelectedCategory] = useState(
+		initialCategory ? capitalize(initialCategory) : "All"
+	);
 	const [sortBy, setSortBy] = useState("featured");
 	const [allCampaigns, setAllCampaigns] = useState([]);
 
@@ -220,6 +227,11 @@ export default function CampaignsPage() {
 	// }, []);
 
 	// const allCampaigns = campaigns || [];
+
+	// Helper to capitalize first letter for matching category names
+	function capitalize(str: string) {
+		return str.charAt(0).toUpperCase() + str.slice(1);
+	}
 
 	const filteredCampaigns = allCampaigns.filter((campaign) => {
 		const matchesSearch =
