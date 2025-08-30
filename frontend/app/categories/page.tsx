@@ -409,50 +409,6 @@ export default function CategoriesPage() {
 									</div>
 								</div>
 							</CardContent>
-
-							{/* Expanded Content */}
-							{selectedCategory === category.id && (
-								<CardContent className="pt-0 border-t">
-									<div className="space-y-4">
-										<h4 className="font-semibold text-sm">
-											Featured Campaigns
-										</h4>
-										<div className="space-y-3">
-											{category.featuredCampaigns.map((campaign) => (
-												<div
-													key={campaign.id}
-													className="flex gap-3 p-2 rounded-lg bg-muted/50"
-												>
-													<Image
-														src={campaign.image || "/placeholder.svg"}
-														alt={campaign.title}
-														width={60}
-														height={45}
-														className="rounded object-cover"
-													/>
-													<div className="flex-1 min-w-0">
-														<p className="text-xs font-medium line-clamp-2">
-															{campaign.title}
-														</p>
-														<div className="flex items-center justify-between mt-1">
-															<span className="text-xs text-muted-foreground">
-																${campaign.raised.toLocaleString()}
-															</span>
-															<span className="text-xs text-muted-foreground">
-																{campaign.backers} backers
-															</span>
-														</div>
-														<Progress
-															value={(campaign.raised / campaign.goal) * 100}
-															className="h-1 mt-1"
-														/>
-													</div>
-												</div>
-											))}
-										</div>
-									</div>
-								</CardContent>
-							)}
 						</Card>
 					))}
 				</div>
