@@ -103,31 +103,31 @@ const team = [
 
 const milestones = [
 	{
-		year: "2020",
-		title: "CrowdFund Founded",
+		year: "2025",
+		title: "Baksho Founded",
 		description:
-			"Started with a vision to democratize fundraising and make positive change accessible to everyone.",
+			"Started with a vision to democratize fundraising and make positive change accessible to everyone in Bangladesh.",
 	},
 	{
-		year: "2021",
-		title: "First Million Raised",
+		year: "2025",
+		title: "First 100tk Raised",
 		description:
-			"Reached our first major milestone with over 1,000 successful campaigns.",
+			"Reached our first major milestone with over 1 successful campaign.",
 	},
+	// {
+	// 	year: "2022",
+	// 	title: "Global Expansion",
+	// 	description:
+	// 		"Expanded to 25+ countries and launched multi-language support.",
+	// },
 	{
-		year: "2022",
-		title: "Global Expansion",
-		description:
-			"Expanded to 25+ countries and launched multi-language support.",
-	},
-	{
-		year: "2023",
+		year: "2026",
 		title: "Mobile App Launch",
 		description:
 			"Launched iOS and Android apps, making fundraising accessible on-the-go.",
 	},
 	{
-		year: "2024",
+		year: "2026",
 		title: "AI-Powered Matching",
 		description:
 			"Introduced smart campaign recommendations and automated fraud detection.",
@@ -288,7 +288,7 @@ export default function AboutPage() {
 								<div key={index} className="flex gap-6">
 									<div className="flex flex-col items-center">
 										<div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold">
-											{milestone.year.slice(-2)}
+											{index + 1}
 										</div>
 										{index < milestones.length - 1 && (
 											<div className="w-0.5 h-16 bg-muted mt-4"></div>
