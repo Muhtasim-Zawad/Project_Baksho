@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react"; // 1. Import 'use'
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,9 +59,10 @@ interface Campaign {
 }
 
 interface CampaignDetailsPageProps {
-	params: {
+	// 2. Update the type to reflect a Promise
+	params: Promise<{
 		id: string;
-	};
+	}>;
 }
 
 // API functions
@@ -122,7 +123,9 @@ export default function CampaignDetailsPage({
 	const [newComment, setNewComment] = useState("");
 
 	const router = useRouter();
-	const campaignId = params.id;
+
+	// 3. Unwrap the promise with React.use()
+	const { id: campaignId } = use(params);
 
 	useEffect(() => {
 		const loadCampaign = async () => {
