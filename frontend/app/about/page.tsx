@@ -25,6 +25,7 @@ import Image from "next/image";
 import riyad from "../../assets/images/riyad.jpg";
 import zawad from "../../assets/images/zawad.jpg";
 import asif from "../../assets/images/asif.jpg";
+import about from "../../assets/images/about_page.jpg";
 
 const stats = [
 	{
@@ -232,11 +233,11 @@ export default function AboutPage() {
 						</div>
 						<div className="relative">
 							<Image
-								src="/placeholder.svg?height=400&width=600"
+								src={about}
 								alt="Our mission"
 								width={600}
 								height={400}
-								className="rounded-lg shadow-lg"
+								className="rounded-lg shadow-lg object-cover w-full"
 							/>
 						</div>
 					</div>
