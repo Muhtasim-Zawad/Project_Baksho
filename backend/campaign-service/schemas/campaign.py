@@ -60,4 +60,7 @@ class CampaignRead(CampaignCreate):
     backers: int
     featured: bool
     urgent: bool
+    reviewed: bool
+    approved: bool
+    note: Optional[str] = None
     incentive_tiers: List[IncentiveTierRead] = []
