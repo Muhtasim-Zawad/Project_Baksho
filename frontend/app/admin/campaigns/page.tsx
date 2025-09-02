@@ -223,12 +223,12 @@ export default function AdminCampaignsPage() {
               </Link>
             </div>
             <nav className="flex items-center space-x-6">
-              <Link
+              {/*<Link
                 href="/admin"
                 className="text-sm font-medium hover:text-green-600"
               >
                 Dashboard
-              </Link>
+              </Link>*/}
               <Link
                 href="/admin/campaigns"
                 className="text-sm font-medium text-green-600"
@@ -236,7 +236,7 @@ export default function AdminCampaignsPage() {
                 Campaigns
               </Link>
               <Link
-                href="/admin/users"
+                href="/admin"
                 className="text-sm font-medium hover:text-green-600"
               >
                 Users

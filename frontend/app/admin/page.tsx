@@ -199,16 +199,16 @@ export default function AdminUsersPage() {
             <div className="flex items-center space-x-2">
               <Box className="h-6 w-6 text-yellow-500" />
               <Link href="/admin" className="text-xl font-bold text-gray-800">
-                Bakso Admin
+                Project Bakso Admin
               </Link>
             </div>
             <nav className="flex items-center space-x-6">
-              <Link
+              {/*<Link
                 href="/admin"
                 className="text-sm font-medium hover:text-green-600"
               >
                 Dashboard
-              </Link>
+              </Link>*/}
               <Link
                 href="/admin/campaigns"
                 className="text-sm font-medium hover:text-green-600"
@@ -216,7 +216,7 @@ export default function AdminUsersPage() {
                 Campaigns
               </Link>
               <Link
-                href="/admin/users"
+                href="/admin"
                 className="text-sm font-medium text-green-600"
               >
                 Users
