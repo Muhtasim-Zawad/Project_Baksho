@@ -161,7 +161,7 @@ services:
     environment:
       - PMA_HOST=mysql-db
       - PMA_PORT=3306
-      - MYSQL_ROOT_PASSWORD=12345678
+      - MYSQL_ROOT_PASSWORD=rootpassword
     depends_on:
       mysql-db:
         condition: service_healthy
