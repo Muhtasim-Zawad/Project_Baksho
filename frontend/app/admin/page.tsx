@@ -117,20 +117,14 @@ export default function AdminUsersPage() {
   const handleRoleChange = async (userId: string, newRole: string) => {
     const token = localStorage.getItem("accessToken");
     try {
-      // NOTE: This assumes a backend endpoint exists to update user roles by an admin.
-      // The current backend code does not have this, it would need to be added.
-      // For this example, we'll use the 'update-profile' endpoint structure.
-      const response = await fetch(
-        `http://localhost:8080/api/users/update-profile/${userId}`, // Hypothetical admin endpoint
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ role: newRole }),
+      const response = await fetch(`http://localhost:8080/api/users/set-role`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({ id: userId, role: newRole }),
+      });
       if (!response.ok) throw new Error("Failed to update role");
       // Refresh user list to show the change
       await fetchUsers();
