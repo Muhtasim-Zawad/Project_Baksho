@@ -30,13 +30,17 @@ class Campaign(SQLModel, table=True):
     organizer_id: str
     organizer_name: str
 
-    # Default values set on creation
     raised: float = Field(default=0.0)
     backers: int = Field(default=0)
+
+    # Default values set on creation
     featured: bool = Field(default=False)
     urgent: bool = Field(default=False)
 
+    reviewed: bool = Field(default=False)
     approved: bool = Field(default=False)
+
+    note:str = Field(default=None, nullable=True)
 
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 

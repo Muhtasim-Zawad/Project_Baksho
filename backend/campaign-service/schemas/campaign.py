@@ -35,6 +35,15 @@ class CampaignUpdate(SQLModel):
     risks: Optional[str] = None
     timeline: Optional[str] = None
     image_urls: Optional[str] = None
+
+    featured: Optional[bool] = None
+    urgent: Optional[bool] = None
+
+    reviewed: Optional[bool] = None
+    approved: Optional[bool] = None
+
+    note: Optional[str] = None
+
     # When updating, we expect a full list of new tiers to replace the old ones.
     incentive_tiers: Optional[List[IncentiveTierCreate]] = None
 
