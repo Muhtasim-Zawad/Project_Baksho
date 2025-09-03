@@ -214,16 +214,6 @@ export default function CampaignsPage() {
 		fetchAndSetCampaign();
 	}, []);
 
-	// use this when backend is ready
-	// const { campaigns, loading, fetchCampaigns } = useCampaign();
-
-	// useEffect(() => {
-	// 	fetchCampaigns();
-	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	// }, []);
-
-	// const allCampaigns = campaigns || [];
-
 	// Helper to capitalize first letter for matching category names
 	function capitalize(str: string) {
 		return str.charAt(0).toUpperCase() + str.slice(1);
