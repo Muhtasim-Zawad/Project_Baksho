@@ -152,6 +152,63 @@ services:
     networks:
       - baksho-net
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000" # API port
+      - "9001:9001" # Console port
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=12345678
+      - MINIO_BROWSER_CORS_ALLOW_ORIGIN=http://localhost:3000
+    command: server /data --console-address ":9001"
+    networks:
+      - baksho-net
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set myminio http://minio:9000 admin 12345678) do
+        echo 'Waiting for MinIO...';
+        sleep 3;
+      done;
+      /usr/bin/mc mb -p myminio/campaign-images;
+      /usr/bin/mc anonymous set public myminio/campaign-images;
+      exit 0;
+      "
+    networks:
+      - baksho-net
+
+  sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: sqlite-web
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./campaign-service/db_data:/data # same volume as your SQLite db
+    environment:
+      - SQLITE_DATABASE=/data/campaigns.db
+    networks:
+      - baksho-net
+
+  notification-sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: notification-sqlite-web
+    ports:
+      - "8083:8080" # New port on the host to avoid conflicts
+    volumes:
+      - notification-db-data:/data # Mounts the notification service's volume
+    environment:
+      - SQLITE_DATABASE=/data/notifications.db # Points to the notification db
+    networks:
+      - baksho-net
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
@@ -161,7 +218,7 @@ services:
     environment:
       - PMA_HOST=mysql-db
       - PMA_PORT=3306
-      - MYSQL_ROOT_PASSWORD=12345678
+      - MYSQL_ROOT_PASSWORD=rootpassword
     depends_on:
       mysql-db:
         condition: service_healthy
@@ -170,6 +227,7 @@ services:
 
 volumes:
   mongo-data:
+  minio_data:
   mysql-data:
   notification-db-data:
 

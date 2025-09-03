@@ -17,6 +17,9 @@ export const verifyUser = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
     }
+    if (user.isBanned) {
+      return res.status(403).json({ message: "User is banned!" });
+    }
 
     const resUser = user.toObject();
     delete resUser.password;
