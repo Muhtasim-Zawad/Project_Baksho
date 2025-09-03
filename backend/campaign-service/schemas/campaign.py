@@ -21,7 +21,7 @@ class CampaignCreate(SQLModel):
     story: str
     risks: str
     timeline: str
-    image_urls: str # Comma-separated list of URLs
+    image_urls: str
     incentive_tiers: List[IncentiveTierCreate] = []
 
 class CampaignUpdate(SQLModel):
@@ -60,4 +60,7 @@ class CampaignRead(CampaignCreate):
     backers: int
     featured: bool
     urgent: bool
+    reviewed: bool
+    approved: bool
+    note: Optional[str] = None
     incentive_tiers: List[IncentiveTierRead] = []

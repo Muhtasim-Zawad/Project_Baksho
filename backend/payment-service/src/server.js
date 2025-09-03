@@ -19,11 +19,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 
-app.use(
-  cors({
-    origin: "*",
-  }),
-);
+// app.use(
+//   cors({
+//     origin: "*",
+//   }),
+// );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

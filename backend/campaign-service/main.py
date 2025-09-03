@@ -88,6 +88,18 @@ def get_campaigns(
     campaigns = campaign_crud.get_all_campaigns(session=session, skip=skip, limit=limit)
     return campaigns
 
+@app.get("/campaigns/approved", response_model=List[CampaignRead])
+def get_campaigns(
+    skip: int = 0,
+    limit: int = 100,
+    session: Session = Depends(get_session)
+):
+    """
+    Retrieve all campaigns.
+    """
+    campaigns = campaign_crud.get_all_approved_campaigns(session=session, skip=skip, limit=limit)
+    return campaigns
+
 @app.get("/campaigns/{campaign_id}", response_model=CampaignRead)
 def get_single_campaign(
     campaign_id: int,

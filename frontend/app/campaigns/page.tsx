@@ -200,7 +200,7 @@ export default function CampaignsPage() {
 
     async function fetchAndSetCampaign() {
       try {
-        const response = await axiosPrivate.get("/campaigns/");
+        const response = await axiosPrivate.get("/campaigns/approved");
         setAllCampaigns(response.data);
         console.log(response.data);
       } catch (err) {
