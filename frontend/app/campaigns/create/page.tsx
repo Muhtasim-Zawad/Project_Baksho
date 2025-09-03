@@ -173,15 +173,15 @@ export default function CreateCampaignPage() {
 		try {
 			const accessToken = localStorage.getItem("accessToken");
 			const existing = JSON.parse(localStorage.getItem("campaigns") || "[]");
-			// const newId = (existing.length + 6 + 1).toString(); //needs to update this
+			const newId = (existing.length + 6 + 1).toString(); //needs to update this
 			const newCampaign = {
-				// id: newId,
+				id: newId,
 				...formData,
 				goal: Number(formData.goal),
 				raised: 0,
 				backers: 0,
 				daysLeft: Number(formData.duration),
-				organizer: user?.name || "Anonymous",
+				organizer_name: user?.name || "Anonymous",
 				featured: false,
 				urgent: false,
 				image: uploadedImageUrls.join(","),

@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors";
+// import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 import { connectDB } from "./config/db.js";
@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
 import eurekaClient from "../eureka-config.js";
+import User from "./models/User.js";
 
 // throw new Error("<<<<< TESTING IF DOCKER IS USING THE NEW CODE >>>>>");
 
@@ -35,6 +36,15 @@ connectDB();
 app.use("/api/users/auth", authRoutes);
 //user route
 app.use("/api/users/", userRoutes);
+
+app.get("/user/:id", async (req, res) => {
+  const userId = req.params.id;
+  const user = await User.findById(userId).select("-password");
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  res.json(user);
+});
 
 app.get("/", (req, res) => {
   res.send("Baksho is Running!!!");

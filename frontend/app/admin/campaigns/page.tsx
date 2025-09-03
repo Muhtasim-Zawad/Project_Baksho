@@ -32,204 +32,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { axiosPrivate } from "@/hooks/useAxiosPrivate";
+import { useRouter } from "next/navigation";
 
-// {
-// 		id: "1",
-// 		title: "Help Build a School in Rural Kenya",
-// 		description:
-// 			"Providing quality education to 500+ children in underserved communities. This project will construct a modern school facility with proper classrooms, library, and computer lab.",
-// 		image: "/placeholder.svg?height=200&width=400",
-// 		category: "Education",
-// 		goal: 50000,
-// 		raised: 32500,
-// 		backers: 234,
-// 		daysLeft: 15,
-// 		location: "Kenya",
-// 		organizer: "Education for All Foundation",
-// 		featured: true,
-// 		urgent: false,
-// 	},
-
-// Mock campaign data for admin review
-// const pendingCampaigns = [
-// 	{
-// 		id: 1,
-// 		title: "Emergency Medical Treatment for Child",
-// 		organizer: {
-// 			name: "Dr. Rahman Medical Center",
-// 			email: "dr.rahman@medical.com",
-// 			verified: true,
-// 			previousCampaigns: 3,
-// 		},
-// 		category: "Healthcare",
-// 		location: "Dhaka, Bangladesh",
-// 		goalAmount: 500000,
-// 		description:
-// 			"Urgent medical treatment needed for a 5-year-old child with heart condition.",
-// 		fullDescription:
-// 			"This campaign is to raise funds for emergency heart surgery for little Aisha, a 5-year-old girl from a low-income family in Dhaka. The surgery costs ৳500,000 and the family cannot afford it. All medical documents are verified.",
-// 		submittedDate: "2024-01-15",
-// 		duration: 30,
-// 		status: "pending",
-// 		riskLevel: "low",
-// 		documents: [
-// 			"medical_report.pdf",
-// 			"doctor_certificate.pdf",
-// 			"family_income_proof.pdf",
-// 		],
-// 		images: ["/placeholder.svg?height=200&width=300"],
-// 		tags: ["Emergency", "Children", "Healthcare"],
-// 		donationTiers: [
-// 			{
-// 				amount: 1000,
-// 				title: "Basic Support",
-// 				description: "Help with medical expenses",
-// 			},
-// 			{
-// 				amount: 5000,
-// 				title: "Treatment Support",
-// 				description: "Significant contribution to surgery",
-// 			},
-// 			{
-// 				amount: 10000,
-// 				title: "Major Donor",
-// 				description: "Major contribution with updates",
-// 			},
-// 		],
-// 	},
-// 	{
-// 		id: 2,
-// 		title: "Tech Startup for Rural Education",
-// 		organizer: {
-// 			name: "InnovateX Solutions",
-// 			email: "founder@innovatex.com",
-// 			verified: false,
-// 			previousCampaigns: 0,
-// 		},
-// 		category: "Business",
-// 		location: "Chittagong, Bangladesh",
-// 		goalAmount: 2000000,
-// 		description:
-// 			"Revolutionary EdTech platform to bring quality education to rural Bangladesh.",
-// 		fullDescription:
-// 			"We're building an AI-powered educational platform specifically designed for rural Bangladeshi students. Our solution includes offline capabilities, local language support, and affordable hardware. We need funding for development, testing, and initial deployment.",
-// 		submittedDate: "2024-01-14",
-// 		duration: 60,
-// 		status: "pending",
-// 		riskLevel: "medium",
-// 		documents: [
-// 			"business_plan.pdf",
-// 			"prototype_demo.pdf",
-// 			"team_credentials.pdf",
-// 		],
-// 		images: [
-// 			"/placeholder.svg?height=200&width=300",
-// 			"/placeholder.svg?height=200&width=300",
-// 		],
-// 		tags: ["Technology", "Education", "Innovation"],
-// 		donationTiers: [
-// 			{
-// 				amount: 5000,
-// 				title: "Early Supporter",
-// 				description: "Get updates and beta access",
-// 			},
-// 			{
-// 				amount: 25000,
-// 				title: "Beta Tester",
-// 				description: "Early access and feedback sessions",
-// 			},
-// 			{
-// 				amount: 100000,
-// 				title: "Partner",
-// 				description: "Partnership benefits and profit sharing",
-// 			},
-// 		],
-// 	},
-// 	{
-// 		id: 3,
-// 		title: "Flood Relief for Sylhet Families",
-// 		organizer: {
-// 			name: "Bangladesh Relief Foundation",
-// 			email: "relief@brf.org",
-// 			verified: true,
-// 			previousCampaigns: 12,
-// 		},
-// 		category: "Disaster Relief",
-// 		location: "Sylhet, Bangladesh",
-// 		goalAmount: 800000,
-// 		description:
-// 			"Emergency relief for 200 families affected by recent flooding in Sylhet region.",
-// 		fullDescription:
-// 			"Recent floods in Sylhet have displaced over 200 families. We need immediate funding for emergency supplies, temporary shelter, clean water, and medical aid. Our team is already on ground providing initial relief.",
-// 		submittedDate: "2024-01-13",
-// 		duration: 45,
-// 		status: "pending",
-// 		riskLevel: "low",
-// 		documents: [
-// 			"damage_assessment.pdf",
-// 			"beneficiary_list.pdf",
-// 			"relief_plan.pdf",
-// 		],
-// 		images: ["/placeholder.svg?height=200&width=300"],
-// 		tags: ["Emergency", "Disaster Relief", "Families"],
-// 		donationTiers: [
-// 			{
-// 				amount: 2000,
-// 				title: "Family Kit",
-// 				description: "Emergency supplies for one family",
-// 			},
-// 			{
-// 				amount: 10000,
-// 				title: "Shelter Support",
-// 				description: "Temporary shelter materials",
-// 			},
-// 			{
-// 				amount: 50000,
-// 				title: "Community Support",
-// 				description: "Support for entire affected area",
-// 			},
-// 		],
-// 	},
-// ];
-
-// const approvedCampaigns = [
-// 	{
-// 		id: 4,
-// 		title: "Rural School Computer Lab",
-// 		organizer: "Education Foundation BD",
-// 		category: "Education",
-// 		goalAmount: 300000,
-// 		raised: 120000,
-// 		donors: 89,
-// 		approvedDate: "2024-01-10",
-// 		status: "active",
-// 	},
-// 	{
-// 		id: 5,
-// 		title: "Clean Water Initiative",
-// 		organizer: "Water for All BD",
-// 		category: "Healthcare",
-// 		goalAmount: 500000,
-// 		raised: 200000,
-// 		donors: 156,
-// 		approvedDate: "2024-01-08",
-// 		status: "active",
-// 	},
-// ];
-
-// const rejectedCampaigns = [
-// 	{
-// 		id: 6,
-// 		title: "Suspicious Investment Scheme",
-// 		organizer: "Unknown Entity",
-// 		category: "Business",
-// 		goalAmount: 5000000,
-// 		rejectedDate: "2024-01-12",
-// 		reason: "Insufficient documentation and suspicious business model",
-// 		status: "rejected",
-// 	},
-// ];
+// NOTE: The mock data has been removed as it will be fetched from the API.
 
 export default function AdminCampaignsPage() {
 	const [selectedTab, setSelectedTab] = useState("pending");
@@ -240,58 +45,199 @@ export default function AdminCampaignsPage() {
 		null
 	);
 	const [reviewNotes, setReviewNotes] = useState("");
-	const [allCampaigns, setAllCampaigns] = useState([]);
 
-	useEffect(() => {
-		async function fetchAndSetCampaign() {
-			try {
-				const response = await axiosPrivate.get("/campaigns/");
-				setAllCampaigns(response.data);
-				console.log(response.data);
-			} catch (err) {
-				console.error("Error fetching campaigns from backend:", err);
-				return [];
-			}
-		}
-		fetchAndSetCampaign();
-	}, []);
+	const [allCampaigns, setAllCampaigns] = useState([]);
+	const [pendingCampaigns, setPendingCampaigns] = useState([]);
+	const [approvedCampaigns, setApprovedCampaigns] = useState([]);
+	const [rejectedCampaigns, setRejectedCampaigns] = useState([]);
+	const router = useRouter();
 
 	const handleReview = (campaign: any, action: "approve" | "reject") => {
 		setSelectedCampaign(campaign);
 		setReviewAction(action);
+		setReviewNotes(campaign.note || ""); // Pre-fill notes if they exist
 		setReviewDialog(true);
 	};
 
-	const submitReview = () => {
-		console.log(
-			`${reviewAction} campaign ${selectedCampaign?.id}:`,
-			reviewNotes
-		);
-		setReviewDialog(false);
-		setReviewNotes("");
-		setSelectedCampaign(null);
-		setReviewAction(null);
+	const submitReview = async () => {
+		if (!selectedCampaign || !reviewAction) return;
+
+		// For rejection, notes are required.
+		if (reviewAction === "reject" && !reviewNotes.trim()) {
+			alert("Rejection reason is required.");
+			return;
+		}
+
+		const token = localStorage.getItem("accessToken");
+		if (!token) {
+			router.push("/login");
+			return;
+		}
+
+		const payload = {
+			approved: reviewAction === "approve",
+			reviewed: true,
+			note: reviewNotes,
+		};
+
+		try {
+			console.log(token);
+			const response = await fetch(
+				`http://localhost:8080/campaigns/${selectedCampaign.id}`,
+				{
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+						"X-User-Id": selectedCampaign.organizer_id,
+					},
+					body: JSON.stringify(payload),
+				}
+			);
+			console.log("selected campaign", selectedCampaign);
+			if (!response.ok) {
+				throw new Error("Failed to update campaign status");
+			} else {
+				if (reviewAction == "approve") {
+					const response = await fetch("http://localhost:8080/notifications/", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${token}`,
+						},
+						body: JSON.stringify({
+							user_id: selectedCampaign.organizer_id,
+							notification: `Your campaign "${selectedCampaign.title}" has been approved and is now live!`,
+							url: `/campaigns/${selectedCampaign.id}`,
+						}),
+					});
+				} else {
+					const response = await fetch("http://localhost:8080/notifications/", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${token}`,
+						},
+						body: JSON.stringify({
+							user_id: selectedCampaign.organizer_id,
+							notification: `Your campaign "${selectedCampaign.title}" has been rejected. Reason: ${reviewNotes}`,
+							url: `/campaigns/${selectedCampaign.id}`,
+						}),
+					});
+				}
+			}
+
+			// Refresh the campaign list to show the change
+			fetchCampaigns();
+		} catch (error) {
+			console.error("Error submitting review:", error);
+			alert("An error occurred while submitting the review.");
+		} finally {
+			// Close and reset the dialog
+			setReviewDialog(false);
+			setReviewNotes("");
+			setSelectedCampaign(null);
+			setReviewAction(null);
+		}
 	};
 
-	// const filteredCampaigns = allCampaigns.filter(
-	// 	(campaign) =>
-	// 		campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-	// 		campaign.organizer.name.toLowerCase().includes(searchTerm.toLowerCase())
-	// );
+	const fetchCampaigns = async () => {
+		const token = localStorage.getItem("accessToken");
+		if (!token) {
+			console.log("No token found, redirecting to login.");
+			router.push("/login");
+			return;
+		}
 
-	// this needs to be fixed after updating campaign model with "pending" bool attribute
-	const pendingCampaigns = allCampaigns.filter(
-		(campaign: any) => campaign.approved == false
-	);
-	console.log("Pending Campaigns: ");
-	console.log(pendingCampaigns);
+		try {
+			const response = await fetch("http://localhost:8080/campaigns/", {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
-	const approvedCampaigns = allCampaigns.filter(
-		(campaign: any) => campaign.approved === true
-	);
+			if (!response.ok) {
+				if (response.status === 401 || response.status === 403) {
+					router.push("/login");
+				}
+				throw new Error("Failed to fetch campaigns");
+			}
 
-	const rejectedCampaigns = allCampaigns.filter(
-		(campaign: any) => campaign.approved === false
+			const data = await response.json();
+			console.log(data[0]);
+			setAllCampaigns(data);
+
+			// Filter campaigns into different states based on their properties
+			const pending = data.filter(
+				(c: any) => c.reviewed === false && c.approved === false
+			);
+			const approved = data.filter((c: any) => c.approved === true);
+			const rejected = data.filter(
+				(c: any) => c.reviewed === true && c.approved === false
+			);
+
+			console.log(pending);
+			console.log(approved);
+			console.log(rejected);
+
+			setPendingCampaigns(pending);
+			setApprovedCampaigns(approved);
+			setRejectedCampaigns(rejected);
+		} catch (error) {
+			console.error("Error fetching campaigns:", error);
+		}
+	};
+
+	useEffect(() => {
+		// 1. Check if the logged-in user is an admin
+		const verifyAdminStatus = async () => {
+			const token = localStorage.getItem("accessToken");
+			if (!token) {
+				router.push("/login");
+				return;
+			}
+
+			try {
+				const response = await fetch(
+					"http://localhost:8080/api/users/get-profile",
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				);
+
+				if (!response.ok) {
+					// If token is invalid or expired, server will return an error
+					router.push("/login");
+					return;
+				}
+
+				const userProfile = await response.json();
+
+				// Check if the user's role is 'admin'
+				if (userProfile.role !== "admin") {
+					// If not an admin, redirect to the homepage
+					router.push("/");
+				} else {
+					// If the user is an admin, fetch the campaign data
+					fetchCampaigns();
+				}
+			} catch (error) {
+				console.error("Failed to verify admin status:", error);
+				// Redirect to login on any error during verification
+				router.push("/login");
+			}
+		};
+
+		verifyAdminStatus();
+	}, [router]); // Added router to the dependency array
+
+	// This derived state will now correctly filter the campaigns from the state
+	const filteredCampaigns = pendingCampaigns.filter(
+		(campaign: any) =>
+			campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			campaign.organizer_name.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
 	return (
@@ -299,14 +245,20 @@ export default function AdminCampaignsPage() {
 			{/* Header */}
 			<header className="bg-white border-b">
 				<div className="container mx-auto px-4 py-4">
-					<div className="flex items-center justify-center">
-						<nav className="flex items-center space-x-6">
-							<Link
-								href="/admin"
-								className="text-sm font-medium hover:text-green-600"
-							>
-								Dashboard
+					<div className="flex items-center justify-between">
+						<div className="flex items-center space-x-2">
+							<Shield className="h-6 w-6 text-yellow-400" />
+							<Link href="/admin" className="text-xl font-bold text-black">
+								Project Bakso Admin
 							</Link>
+						</div>
+						<nav className="flex items-center space-x-6">
+							{/*<Link
+                href="/admin"
+                className="text-sm font-medium hover:text-green-600"
+              >
+                Dashboard
+              </Link>*/}
 							<Link
 								href="/admin/campaigns"
 								className="text-sm font-medium text-green-600"
@@ -314,7 +266,7 @@ export default function AdminCampaignsPage() {
 								Campaigns
 							</Link>
 							<Link
-								href="/admin/users"
+								href="/admin"
 								className="text-sm font-medium hover:text-green-600"
 							>
 								Users
@@ -395,7 +347,13 @@ export default function AdminCampaignsPage() {
 							<Target className="h-4 w-4 text-blue-500" />
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">85%</div>
+							<div className="text-2xl font-bold">
+								{allCampaigns.length > 0
+									? `${Math.round(
+											(approvedCampaigns.length / allCampaigns.length) * 100
+									  )}%`
+									: "N/A"}
+							</div>
 							<p className="text-xs text-muted-foreground">Approval rate</p>
 						</CardContent>
 					</Card>
@@ -445,7 +403,7 @@ export default function AdminCampaignsPage() {
 				{/* Campaigns List */}
 				{selectedTab === "pending" && (
 					<div className="space-y-6">
-						{allCampaigns.map((campaign) => (
+						{filteredCampaigns.map((campaign: any) => (
 							<Card key={campaign.id} className="overflow-hidden">
 								<CardContent className="p-0">
 									<div className="grid lg:grid-cols-3 gap-6 p-6">
@@ -480,8 +438,7 @@ export default function AdminCampaignsPage() {
 											<div className="space-y-2 text-sm">
 												<div className="flex items-center text-gray-600">
 													<User className="h-4 w-4 mr-2" />
-													{/* {campaign.organizer.name || "Deafult Name"} */}
-													{"Deafult Name"}
+													{campaign.organizer_name}
 												</div>
 												<div className="flex items-center text-gray-600">
 													<MapPin className="h-4 w-4 mr-2" />
@@ -521,60 +478,45 @@ export default function AdminCampaignsPage() {
 														<div className="space-y-6">
 															<div>
 																<h4 className="font-semibold mb-2">
-																	Full Description
+																	Story / Full Description
 																</h4>
 																<p className="text-sm text-gray-700">
 																	{campaign.story}
 																</p>
 															</div>
-															// incentive tiers here
-															{/* <div>
+
+															<div>
+																<h4 className="font-semibold mb-2">
+																	Risks & Challenges
+																</h4>
+																<p className="text-sm text-gray-700">
+																	{campaign.risks}
+																</p>
+															</div>
+
+															<div>
 																<h4 className="font-semibold mb-2">
 																	Donation Tiers
 																</h4>
 																<div className="space-y-2">
-																	{campaign.donationTiers.map((tier, index) => (
-																		<div
-																			key={index}
-																			className="border rounded p-3"
-																		>
-																			<div className="font-medium">
-																				৳{tier.amount.toLocaleString()} -{" "}
-																				{tier.title}
+																	{campaign.incentive_tiers.map(
+																		(tier: any, index: number) => (
+																			<div
+																				key={index}
+																				className="border rounded p-3"
+																			>
+																				<div className="font-medium">
+																					৳{tier.amount.toLocaleString()} -{" "}
+																					{tier.title}
+																				</div>
+																				<div className="text-sm text-gray-600">
+																					{tier.description}
+																				</div>
 																			</div>
-																			<div className="text-sm text-gray-600">
-																				{tier.description}
-																			</div>
-																		</div>
-																	))}
+																		)
+																	)}
 																</div>
-															</div> */}
-															{/* <div>
-																<h4 className="font-semibold mb-2">
-																	Documents Submitted
-																</h4>
-																<div className="space-y-1">
-																	{campaign.documents.map((doc, index) => (
-																		<div
-																			key={index}
-																			className="flex items-center text-sm"
-																		>
-																			<FileText className="h-4 w-4 mr-2" />
-																			{doc}
-																		</div>
-																	))}
-																</div>
-															</div> */}
-															{/* <div>
-																<h4 className="font-semibold mb-2">Tags</h4>
-																<div className="flex flex-wrap gap-2">
-																	{campaign.tags.map((tag) => (
-																		<Badge key={tag} variant="outline">
-																			{tag}
-																		</Badge>
-																	))}
-																</div>
-															</div> */}
+															</div>
 														</div>
 													</DialogContent>
 												</Dialog>
@@ -596,6 +538,11 @@ export default function AdminCampaignsPage() {
 													Reject Campaign
 												</Button>
 											</div>
+
+											<div className="text-xs text-gray-500 pt-4 border-t">
+												Submitted:{" "}
+												{new Date(campaign.created_at).toLocaleDateString()}
+											</div>
 										</div>
 									</div>
 								</CardContent>
@@ -606,7 +553,7 @@ export default function AdminCampaignsPage() {
 
 				{selectedTab === "approved" && (
 					<div className="space-y-4">
-						{approvedCampaigns.map((campaign) => (
+						{approvedCampaigns.map((campaign: any) => (
 							<Card key={campaign.id}>
 								<CardContent className="pt-6">
 									<div className="flex justify-between items-start">
@@ -619,18 +566,15 @@ export default function AdminCampaignsPage() {
 												<Badge variant="outline">{campaign.category}</Badge>
 											</div>
 											<p className="text-gray-600 mb-2">
-												By: {campaign.organizer}
+												By: {campaign.organizer_name}
 											</p>
 											<div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-												<span>
-													Goal: ৳{campaign.goalAmount.toLocaleString()}
-												</span>
+												<span>Goal: ৳{campaign.goal.toLocaleString()}</span>
 												<span>Raised: ৳{campaign.raised.toLocaleString()}</span>
-												<span>{campaign.donors} donors</span>
-												<span>Approved: {campaign.approvedDate}</span>
+												<span>{campaign.backers} donors</span>
 											</div>
 											<Progress
-												value={(campaign.raised / campaign.goalAmount) * 100}
+												value={(campaign.raised / campaign.goal) * 100}
 												className="h-2"
 											/>
 										</div>
@@ -653,7 +597,7 @@ export default function AdminCampaignsPage() {
 
 				{selectedTab === "rejected" && (
 					<div className="space-y-4">
-						{rejectedCampaigns.map((campaign) => (
+						{rejectedCampaigns.map((campaign: any) => (
 							<Card key={campaign.id} className="border-red-200">
 								<CardContent className="pt-6">
 									<div className="flex justify-between items-start">
@@ -666,25 +610,25 @@ export default function AdminCampaignsPage() {
 												<Badge variant="outline">{campaign.category}</Badge>
 											</div>
 											<p className="text-gray-600 mb-2">
-												By: {campaign.organizer}
+												By: {campaign.organizer_name}
 											</p>
-											<div className="text-sm text-gray-500 mb-2">
-												Goal: ৳{campaign.goalAmount.toLocaleString()} •
-												Rejected: {campaign.rejectedDate}
-											</div>
 											<div className="bg-red-50 border border-red-200 rounded p-3">
 												<div className="text-sm font-medium text-red-800 mb-1">
 													Rejection Reason:
 												</div>
 												<div className="text-sm text-red-700">
-													{campaign.reason}
+													{campaign.note || "No reason provided."}
 												</div>
 											</div>
 										</div>
 										<div className="flex space-x-2">
-											<Button variant="outline" size="sm">
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() => handleReview(campaign, "reject")}
+											>
 												<Eye className="h-4 w-4 mr-2" />
-												Review
+												Review/Edit Reason
 											</Button>
 										</div>
 									</div>
@@ -715,7 +659,7 @@ export default function AdminCampaignsPage() {
 									Campaign: {selectedCampaign?.title}
 								</h4>
 								<p className="text-sm text-gray-600">
-									Organizer: {selectedCampaign?.organizer.name}
+									Organizer: {selectedCampaign?.organizer_name}
 								</p>
 							</div>
 							<div className="space-y-2">

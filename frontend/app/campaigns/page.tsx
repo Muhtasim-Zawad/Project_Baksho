@@ -214,10 +214,18 @@ export default function CampaignsPage() {
 		fetchAndSetCampaign();
 	}, []);
 
-	// Helper to capitalize first letter for matching category names
-	function capitalize(str: string) {
-		return str.charAt(0).toUpperCase() + str.slice(1);
-	}
+    async function fetchAndSetCampaign() {
+      try {
+        const response = await axiosPrivate.get("/campaigns/approved");
+        setAllCampaigns(response.data);
+        console.log(response.data);
+      } catch (err) {
+        console.error("Error fetching campaigns from backend:", err);
+        return [];
+      }
+    }
+    fetchAndSetCampaign();
+  }, []);
 
 	const filteredCampaigns = allCampaigns.filter((campaign) => {
 		const matchesSearch =

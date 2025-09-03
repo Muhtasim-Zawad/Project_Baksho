@@ -39,11 +39,19 @@ def get_campaign_by_id(session: Session, campaign_id: int) -> Campaign | None:
     campaign = session.exec(statement).first()
     return campaign
 
-def get_all_campaigns(session: Session, skip: int = 0, limit: int = 100) -> list[Campaign]:
+def get_all_approved_campaigns(session: Session, skip: int = 0, limit: int = 100) -> list[Campaign]:
     """
     Retrieves a list of approved campaigns with pagination.
     """
     statement = select(Campaign).where(Campaign.approved == True).offset(skip).limit(limit)
+    campaigns = session.exec(statement).all()
+    return campaigns
+
+def get_all_campaigns(session: Session, skip: int = 0, limit: int = 100) -> list[Campaign]:
+    """
+    Retrieves a list of approved campaigns with pagination.
+    """
+    statement = select(Campaign).offset(skip).limit(limit)
     campaigns = session.exec(statement).all()
     return campaigns
 

@@ -25,6 +25,26 @@ services:
     networks:
       - baksho-net
 
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: payment_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - baksho-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   user-service:
     build: ./user_service
     container_name: user-service
@@ -61,20 +81,40 @@ services:
       - baksho-net
 
   notification-service:
-    build: ./notification-service # Assumes your FastAPI service is in the 'notification-service' directory
+    build: ./notification-service
     container_name: notification-service
     ports:
       - "8002:8002"
     environment:
-      # This URL points to the database file inside the container's volume
       - DATABASE_URL=sqlite:///./db_data/notifications.db
-      # Environment variables for service discovery with Eureka
       - EUREKA_SERVER=http://service-registry:8761/eureka
       - APP_HOST=notification-service
       - APP_PORT=8000
     volumes:
-      - notification-db-data:/app/db_data # Persists the SQLite database
+      - notification-db-data:/app/db_data
     depends_on:
+      service-registry:
+        condition: service_healthy
+    networks:
+      - baksho-net
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    ports:
+      - "1234:1234"
+    environment:
+      - PORT=1234
+      - DB_HOST=mysql-db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=payment_db
+      - STRIPE_SECRET_KEY=sk_test_51PNCu5RuW4NDldMh2Fhfne9kXcHFULTyfIUOO2hL2MJy6ocbYy1hKqumGoOmM5tG2NvEI9WLPPMy2GugE5PMIo6p00XwNE6Can
+      - EUREKA_HOST=service-registry
+      - EUREKA_PORT=8761
+    depends_on:
+      mysql-db:
+        condition: service_healthy
       service-registry:
         condition: service_healthy
     networks:
@@ -89,12 +129,10 @@ services:
       - EUREKA_SERVER_URL=http://service-registry:8761/eureka
       - JWT_SECRET=T7bH5KSsPtfAvaTJZpHjZ1NDwGADMxUA
     depends_on:
-      service-registry:
-        condition: service_healthy
-      user-service:
-        condition: service_started
-      campaign-service:
-        condition: service_started
+      - service-registry
+      - user-service
+      - campaign-service
+      - payment-service
     networks:
       - baksho-net
 
@@ -171,9 +209,26 @@ services:
     networks:
       - baksho-net
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8084:80" # Host port 8084 mapped to container port 80
+    environment:
+      - PMA_HOST=mysql-db
+      - PMA_PORT=3306
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - baksho-net
+
 volumes:
   mongo-data:
   minio_data:
+  mysql-data:
   notification-db-data:
 
 networks:
