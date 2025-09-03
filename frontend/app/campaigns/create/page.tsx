@@ -181,7 +181,7 @@ export default function CreateCampaignPage() {
         raised: 0,
         backers: 0,
         daysLeft: Number(formData.duration),
-        organizer: user?.name || "Anonymous",
+        organizer_name: user?.name || "Anonymous",
         featured: false,
         urgent: false,
         image: uploadedImageUrls.join(","),
