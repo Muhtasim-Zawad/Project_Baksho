@@ -81,6 +81,7 @@ export default function AdminCampaignsPage() {
     };
 
     try {
+      console.log(token);
       const response = await fetch(
         `http://localhost:8080/campaigns/${selectedCampaign.id}`,
         {
@@ -88,13 +89,42 @@ export default function AdminCampaignsPage() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            "X-User-Id": selectedCampaign.organizer_id,
           },
           body: JSON.stringify(payload),
         },
       );
-
+      console.log("selected campaign", selectedCampaign);
       if (!response.ok) {
         throw new Error("Failed to update campaign status");
+      } else {
+        if (reviewAction == "approve") {
+          const response = await fetch("http://localhost:8080/notifications/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              user_id: selectedCampaign.organizer_id,
+              notification: `Your campaign "${selectedCampaign.title}" has been approved and is now live!`,
+              url: `/campaigns/${selectedCampaign.id}`,
+            }),
+          });
+        } else {
+          const response = await fetch("http://localhost:8080/notifications/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              user_id: selectedCampaign.organizer_id,
+              notification: `Your campaign "${selectedCampaign.title}" has been rejected. Reason: ${reviewNotes}`,
+              url: `/campaigns/${selectedCampaign.id}`,
+            }),
+          });
+        }
       }
 
       // Refresh the campaign list to show the change
