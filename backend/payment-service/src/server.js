@@ -19,11 +19,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 
-// app.use(
-//   cors({
-//     origin: "*",
-//   }),
-// );
+// app.use((req, res, next) => {
+//   // Check if the 'Access-Control-Allow-Origin' header is already set.
+//   if (res.getHeader("Access-Control-Allow-Origin")) {
+//     // If it is, move to the next middleware without adding another CORS header.
+//     return next();
+//   }
+//   // If it's not set, apply the CORS middleware.
+//   cors({ origin: "*" })(req, res, next);
+// });
+
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:8080"], // Add your frontend URLs
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -126,6 +140,7 @@ app.get("/payments", (req, res) => {
 });
 
 app.get("/payments/user/:userId", (req, res) => {
+  console.log(req.params);
   const { userId } = req.params;
   const query =
     "SELECT * FROM payments WHERE user_id = ? ORDER BY created_at DESC";

@@ -78,10 +78,8 @@ export interface Transaction {
   created_at: string;
 }
 
-
 // API functions
 const API_BASE_URL = "http://localhost:8080";
-
 
 const getAuthToken = (): string | null => {
   if (typeof window !== "undefined") {
@@ -146,7 +144,9 @@ export default function CampaignDetailsPage({
   useEffect(() => {
     const loadTransactions = async () => {
       try {
-        const response = await fetchWithAuth(`http://localhost:1234/payments/campaign/${campaignId}`);
+        const response = await fetchWithAuth(
+          `http://localhost:1234/payments/campaign/${campaignId}`,
+        );
         setTransactions(Array.isArray(response) ? response : []);
       } catch (err) {
         console.error("Error fetching transactions:", err);
@@ -156,10 +156,10 @@ export default function CampaignDetailsPage({
     loadTransactions();
   }, [campaignId]);
 
-
-
-  if(transactions.length > 0 && totalRaised === 0) {
-    setTotalRaised(transactions.reduce((acc, tx) => acc + Number(tx.amount), 0));
+  if (transactions.length > 0 && totalRaised === 0) {
+    setTotalRaised(
+      transactions.reduce((acc, tx) => acc + Number(tx.amount), 0),
+    );
   }
 
   useEffect(() => {
@@ -247,6 +247,7 @@ export default function CampaignDetailsPage({
   }
 
   const progressPercentage = (totalRaised / campaign.goal) * 100;
+  console.log(progressPercentage);
   const daysLeft = calculateDaysLeft(
     campaign.created_at || "",
     campaign.duration,
@@ -534,10 +535,11 @@ export default function CampaignDetailsPage({
                     {campaign.incentive_tiers.map((tier, index) => (
                       <div
                         key={tier.id}
-                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${selectedTier === index
-                          ? "border-green-500 bg-green-50"
-                          : "border-gray-200 hover:border-gray-300"
-                          }`}
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                          selectedTier === index
+                            ? "border-green-500 bg-green-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
                         onClick={() =>
                           setSelectedTier(selectedTier === index ? null : index)
                         }
@@ -560,16 +562,15 @@ export default function CampaignDetailsPage({
                     ))}
 
                     <div className="pt-4 space-y-3">
-
-
-                      {
-                        selectedTier == null ? " ": 
-                        <PaymentForm 
-                          price={campaign.incentive_tiers[selectedTier].amount} 
+                      {selectedTier == null ? (
+                        " "
+                      ) : (
+                        <PaymentForm
+                          price={campaign.incentive_tiers[selectedTier].amount}
                           campaignId={campaign.id}
                           setTotalRaised={setTotalRaised}
                         />
-                      }
+                      )}
 
                       <Button
                         variant="outline"

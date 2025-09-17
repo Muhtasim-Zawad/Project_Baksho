@@ -82,14 +82,16 @@ export default function UserDashboard() {
         let userPayments: Transaction[] = [];
         try {
           const paymentsRes = await fetch(
-            `http://localhost:8080/payments/user/${user._id}`,
+            `http://localhost:1234/payments/user/${user._id}`,
             {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json",
               },
             },
           );
+          console.log(paymentsRes);
           userPayments = paymentsRes.ok ? await paymentsRes.json() : [];
         } catch (paymentError) {
           console.error("Could not fetch payment data:", paymentError);
@@ -194,7 +196,7 @@ export default function UserDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${stats.totalDonated.toFixed(2)}
+                ৳ {stats.totalDonated.toFixed(2) - 50}
               </div>
               <p className="text-xs text-muted-foreground">
                 Across {stats.campaignsSupported} campaigns
@@ -302,7 +304,7 @@ export default function UserDashboard() {
                                 </Badge>
                               </div>
 
-                              <div className="space-y-2">
+                              {/*<div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                   <span>
                                     ${campaign.raised.toLocaleString()} raised
@@ -316,7 +318,7 @@ export default function UserDashboard() {
                                     (campaign.raised / campaign.goal) * 100
                                   }
                                 />
-                              </div>
+                              </div>*/}
 
                               <div className="flex items-center justify-between">
                                 <p className="text-sm text-muted-foreground">
@@ -398,11 +400,11 @@ export default function UserDashboard() {
 
                               <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
+                                  {/*<span>
+                                    ৳{campaign.raised.toLocaleString()} raised
+                                  </span>*/}
                                   <span>
-                                    ${campaign.raised.toLocaleString()} raised
-                                  </span>
-                                  <span>
-                                    ${campaign.goal.toLocaleString()} goal
+                                    ৳{campaign.goal.toLocaleString()} goal
                                   </span>
                                 </div>
                                 <Progress
@@ -462,7 +464,7 @@ export default function UserDashboard() {
                             From: {item.campaignTitle}
                           </p>
                           <Badge variant={"secondary"}>
-                            Donated ${item.incentive.amount}
+                            Donated ৳{item.incentive.amount}
                           </Badge>
                         </div>
                         <div className="text-right text-sm text-muted-foreground">
